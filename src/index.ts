@@ -4,6 +4,7 @@ import { AnimationFactory } from './core/Animation'
 import { debug } from './core/Utils'
 import { TexturedMeshNME } from './shaders/TexturedMeshNME'
 import { SPANISH_BLUE, WHITE } from './core/Colors'
+import { GlobPortal } from './puzzles/GlobPortal'
 
 
 const { Engine, Scene, MeshBuilder, HemisphericLight, UniversalCamera, Vector3, PointerEventTypes } = BABYLON
@@ -35,7 +36,7 @@ const init = async () => {
     engine.displayLoadingUI()
 
     // *** CAMERA ***
-    const camera = new UniversalCamera('MainCamera', new Vector3(-23, 1.615, 13.5), scene)
+    const camera = new UniversalCamera('MainCamera', new Vector3(0, 1.615, -5), scene)
     camera.inertia = 0
     camera.speed = 3
     camera.keysUp.push(87)    		// W
@@ -129,7 +130,10 @@ const init = async () => {
     ground.position.y = -0.01
     
     // *** PLACE PUZZLES HERE ***
-    
+    // Red Room
+    const glob = new GlobPortal(scene)
+    glob.position = Vector3.Zero()
+
 
     // *** BOUNDING BOX ***
     const bounds = MeshBuilder.CreateBox('bounds', {
@@ -147,7 +151,7 @@ const init = async () => {
 
     // WebXR
     const xr = await scene.createDefaultXRExperienceAsync({
-        floorMeshes: [] // TODO: Add Floors from puzzles
+        floorMeshes: [ground] // TODO: Add Floors from puzzles
     })
     xr.input.onControllerAddedObservable.add((controller) => {
         controller.onMotionControllerInitObservable.add((motionController) => {
