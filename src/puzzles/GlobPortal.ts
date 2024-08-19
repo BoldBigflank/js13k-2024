@@ -34,6 +34,7 @@ export class GlobPortal {
         // Create the container
         const ref = 1 // TODO: Increment
         const sphere = BABYLON.MeshBuilder.CreateSphere(`${ref}`, { sideOrientation: 1, diameter: 0.5 })
+        sphere.isPickable = false
         sphere.position.y = 1.65
         const mat = new BABYLON.StandardMaterial(`${ref}`)
         sphere.material = mat
@@ -47,6 +48,7 @@ export class GlobPortal {
         // Create the walls
         const color = BABYLON.Color3.Random()
         const box2 = BABYLON.MeshBuilder.CreateBox(`box_2${ref}`, { size: boxSize, sideOrientation: 1 })
+        box2.isPickable = false
         box2.setParent(this.parent)
         box2.position.y = 0.5 * boxSize + 0.01
         const mat2 = new BABYLON.PBRMaterial("")
@@ -65,6 +67,7 @@ export class GlobPortal {
         boxMat.stencil.func = BABYLON.Engine.EQUAL
         for (let i = 0; i < 5; i++) {
             const box = BABYLON.MeshBuilder.CreateBox(`box-${ref}-${i}`, {size: 0.25})
+            box.isPickable = false
             box.material = boxMat
             box.setParent(this.parent)
             box.position = new Vector3(

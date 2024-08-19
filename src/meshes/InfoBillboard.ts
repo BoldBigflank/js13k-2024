@@ -1,6 +1,4 @@
-import { ColorMaterial, SymbolMaterial, TextMaterial } from '@/core/textures'
-import { debug } from '@/core/Utils'
-import { TexturedMeshNME } from '@/shaders/TexturedMeshNME'
+import { TextMaterial } from '@/core/textures'
 
 const { TransformNode, 
     MeshBuilder,
@@ -24,6 +22,7 @@ export class InfoBillboard {
 
         // this.billboard.material = TextMaterial(lines, scene)
         this.billboard.setParent(this.parent)
+        this.billboard.isPickable = false
         this.billboard.position = new Vector3(0, 0.6, 0)
         this.billboard.rotation.x = Math.PI / 4
     }

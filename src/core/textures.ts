@@ -1,6 +1,5 @@
 import {
     BLACK,
-    BLUE,
     BRICK1,
     BRICK2,
     BRICK3,
@@ -19,7 +18,6 @@ import {
     GRAVEL3,
     GRAVEL4,
     GRAVEL5,
-    LIGHT_GREEN,
     MID_GREY,
     ORANGE,
     SPANISH_BLUE,
@@ -361,7 +359,7 @@ export const TextMaterial = (lines: string[], scene: BABYLON.Scene) => {
     ctx.fillStyle = BLACK
     
     ctx.font = `64px Helvetica`
-    ctx.scale(1.0, 3) // The only infobillboard I'm using is 3:1
+    ctx.scale(1.0, lines.length)
     ctx.textBaseline = "top"
     ctx.textAlign = "left"
     if (lines.length > 0) {

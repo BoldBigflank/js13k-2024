@@ -1,6 +1,6 @@
 import { InteractiveMesh } from "@/Types"
 import { AnimationFactory } from "@/core/Animation"
-import { BLUE, SPANISH_BLUE } from "@/core/Colors"
+import { SPANISH_BLUE } from "@/core/Colors"
 import { BlipSFX, SolvedSFX } from "@/core/Sounds"
 import { ColorMaterial, DialMaterial, SymbolMaterial } from "@/core/textures"
 
@@ -34,7 +34,7 @@ export class DialPuzzle {
         this.parent = new TransformNode('DialPuzzle', this.scene)
         this.parent.position = Vector3.Zero()
         this.dials = []
-        this.solvedEvent = (opts.solvedEvent) ? opts.solvedEvent : () => {}
+        this.solvedEvent = (opts.solvedEvent) ? opts.solvedEvent : () => {return null}
         this.reset()
     }
     

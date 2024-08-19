@@ -1,7 +1,6 @@
 import { ColorMaterial, DirtMaterial } from '@/core/textures'
 import { FlowerBoxPuzzle } from './FlowerBoxPuzzle'
 import { waterNME } from '@/shaders/waterNME'
-import { Engine, Scene } from 'babylonjs'
 import { BLACK } from '@/core/Colors'
 import { InteractiveMesh } from '@/Types'
 import { AnimationFactory } from '@/core/Animation'

@@ -1,10 +1,11 @@
 import type { InteractiveMesh } from '@/Types'
-import { GrassMaterial, CursorMaterial } from './core/textures'
+import { GrassMaterial, CursorMaterial, ColorMaterial } from './core/textures'
 import { AnimationFactory } from './core/Animation'
 import { debug } from './core/Utils'
 import { TexturedMeshNME } from './shaders/TexturedMeshNME'
 import { SPANISH_BLUE, WHITE } from './core/Colors'
 import { GlobPortal } from './puzzles/GlobPortal'
+import { TimerChallenge } from './puzzles/TimerChallenge'
 
 
 const { Engine, Scene, MeshBuilder, HemisphericLight, UniversalCamera, Vector3, PointerEventTypes } = BABYLON
@@ -130,10 +131,21 @@ const init = async () => {
     ground.position.y = -0.01
     
     // *** PLACE PUZZLES HERE ***
+    
+    const b = BABYLON.MeshBuilder.CreateBox('', {size: 1}, scene)
+    b.position.z = 4
+    b.position.y = 1.5
+    const bm = ColorMaterial("#ff00ff", scene)
+    // bm.stencil.enabled = true
+    // bm.stencil.funcRef = 0
+    // bm.stencil.func = BABYLON.Engine.EQUAL
+    b.material = bm
+    
     // Red Room
     const glob = new GlobPortal(scene)
     glob.position = Vector3.Zero()
 
+    new TimerChallenge(scene)
 
     // *** BOUNDING BOX ***
     const bounds = MeshBuilder.CreateBox('bounds', {
