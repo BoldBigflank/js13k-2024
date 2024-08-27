@@ -12,8 +12,8 @@ Make them orbs?
 
 
 
-Main room - Choose a skill
- - 
+Main room - Choose a Puzzle
+ - Story - Game Master trapped you
 
 Puzzle 1 - Skill - Clock Stopper
  - Stop the clock at 13
@@ -24,3 +24,5 @@ Puzzle 3 - Mystery - Lights Off
 Puzzle 4 - Physical - Snake
  - Follow the pointer; Grow to a size of 13
  - Could do an agar.io style snake
+
+Victory Area
