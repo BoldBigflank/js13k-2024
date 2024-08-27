@@ -23,16 +23,23 @@ export class Clock {
     value: number
     tickSFX?: BABYLON.Sound
     face?: BABYLON.Mesh
+    body?: BABYLON.Mesh
     state: 'intro'|'running'|'passed'|'failed'
+    materials: Record<string, BABYLON.Material>
 
     constructor(opts: ClockOpts, scene: BABYLON.Scene) {
         this.scene = scene
-        this.startDt = Date.now()
+        this.startDt = Date.now() + Math.random() * 500 // .5s jitter
         this.endDt = this.startDt + (opts.count ? opts.count : 30) * 1000
         this.parent = new TransformNode('Clock', this.scene) as InteractiveMesh
         this.value = 0
         this.state = 'running'
-        this.target = opts.target || 14
+        this.target = opts.target || 13
+        this.materials = {
+            red: ColorMaterial("#ff0000", scene),
+            green: ColorMaterial("#BAD455", scene),
+            blue: ColorMaterial("#0000ff", scene)
+        }
         this.reset()
     }
 
@@ -60,10 +67,11 @@ export class Clock {
             height: 0.6,
             depth: 0.25
         })
-        body.material = ColorMaterial('#ff00ff', this.scene)
+        body.material = this.materials.blue
         body.setParent(this.parent)
         body.position = new Vector3(0, 0, 0)
         this.tickSFX.attachToMesh(body)
+        this.body = body
 
         const face = MeshBuilder.CreatePlane('billboard', {
             width: 0.7,
@@ -82,10 +90,10 @@ export class Clock {
                     if (newValue < this.target + 6) {
                         this.tickSFX?.play()
                     }
-                    if (this.face) this.face.material = TextMaterial([`${this.value}`], this.scene)
-                    if (newValue < this.target) this.state = 'failed'
+                    if (newValue < this.target) this.fail()
                 }
                 this.value = newValue
+                if (this.face) this.face.material = TextMaterial([`${this.value}`], this.scene)
             }
         })
         
@@ -94,10 +102,21 @@ export class Clock {
 
     start() {
         this.state = 'running'
+        if (this.body) this.body.material = this.materials.blue
     }
 
     stop() {
-        this.state = (this.value === this.target) ? 'passed' : 'failed'
+        (this.value === this.target) ? this.pass() : this.fail()
+    }
+
+    pass() {
+        this.state = "passed"
+        if (this.body) this.body.material = this.materials.green
+    }
+
+    fail() {
+        this.state = 'failed'
+        if (this.body) this.body.material = this.materials.red
     }
 
 }

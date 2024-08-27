@@ -131,21 +131,14 @@ const init = async () => {
     ground.position.y = -0.01
     
     // *** PLACE PUZZLES HERE ***
-    
-    const b = BABYLON.MeshBuilder.CreateBox('', {size: 1}, scene)
-    b.position.z = 4
-    b.position.y = 1.5
-    const bm = ColorMaterial("#ff00ff", scene)
-    // bm.stencil.enabled = true
-    // bm.stencil.funcRef = 0
-    // bm.stencil.func = BABYLON.Engine.EQUAL
-    b.material = bm
-    
-    // Red Room
-    const glob = new GlobPortal(scene)
-    glob.position = Vector3.Zero()
+        
+    // // Red Room
+    // const glob = new GlobPortal(scene)
+    // glob.position = Vector3.Zero()
 
+    // Clock Challenge
     new TimerChallenge(scene)
+    
 
     // *** BOUNDING BOX ***
     const bounds = MeshBuilder.CreateBox('bounds', {

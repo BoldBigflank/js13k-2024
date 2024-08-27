@@ -55,7 +55,10 @@ export class TimerChallenge {
         // Make clocks and position them around the room
         const shuffledClockPositions = shuffle([...Array(BOX_SIZE * BOX_HEIGHT * 4).keys()])
         for (let i = 0; i < CLOCK_COUNT; i++) {
-            const c = new Clock({count: 30 + 5 * i}, this.scene)
+            const startTime = 30
+            const difference = 5
+            const jitter = Math.random() * 500
+            const c = new Clock({count: startTime + difference * i + jitter}, this.scene)
             // Place each clock on the wall
             const faceIndex = Math.floor(shuffledClockPositions[i] / (BOX_SIZE * BOX_HEIGHT))
             const clockPositionIndex = shuffledClockPositions[i] % (BOX_SIZE * BOX_HEIGHT)
@@ -65,9 +68,6 @@ export class TimerChallenge {
             c.model.rotateAround(this.parent.position, Vector3.UpReadOnly, 0.5 * Math.PI * faceIndex)
             c.model.onPointerPick = () => {
                 c.stop()
-                if (c.state === 'passed') { // Change to 13
-
-                }
             }
         }
 
