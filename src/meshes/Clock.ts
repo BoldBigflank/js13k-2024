@@ -29,7 +29,7 @@ export class Clock {
 
     constructor(opts: ClockOpts, scene: BABYLON.Scene) {
         this.scene = scene
-        this.startDt = Date.now() + Math.random() * 500 // .5s jitter
+        this.startDt = Date.now()
         this.endDt = this.startDt + (opts.count ? opts.count : 30) * 1000
         this.parent = new TransformNode('Clock', this.scene) as InteractiveMesh
         this.value = 0

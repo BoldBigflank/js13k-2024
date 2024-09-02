@@ -17,12 +17,12 @@ Main room - Choose a Puzzle
 
 Puzzle 1 - Skill - Clock Stopper
  - Stop the clock at 13
-Puzzle 2 - Mental - Magic Square
- - Switch numbers around to add up to 13 on all rows/columns/diag
 Puzzle 3 - Mystery - Lights Off
  - Press buttons to turn off lights to reveal a 13, avoid reset buttons
 Puzzle 4 - Physical - Snake
  - Follow the pointer; Grow to a size of 13
  - Could do an agar.io style snake
+Puzzle 2 - Mental - Magic Square
+ - Switch numbers around to add up to 13 on all rows/columns/diag
 
 Victory Area

@@ -25,6 +25,8 @@ const init = async () => {
     })
     const engine = new Engine(canvas, true)
     const scene = new Scene(engine)
+    let activePuzzle: TimerChallenge|null = null
+    const puzzles = []
     AnimationFactory.Instance.initScene(scene)
     scene.gravity = new Vector3(0, -0.15, 0)
     scene.collisionsEnabled = true
@@ -137,8 +139,14 @@ const init = async () => {
     // glob.position = Vector3.Zero()
 
     // Clock Challenge
-    new TimerChallenge(scene)
+    puzzles.push(new TimerChallenge(scene))
+    activePuzzle = puzzles[0]
     
+    scene.registerBeforeRender(() => {
+        if (!activePuzzle) return
+        activePuzzle.isSolved()
+        activePuzzle.isFailed()
+    })
 
     // *** BOUNDING BOX ***
     const bounds = MeshBuilder.CreateBox('bounds', {

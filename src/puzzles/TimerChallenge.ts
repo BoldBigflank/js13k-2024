@@ -7,6 +7,9 @@ export class TimerChallenge {
     scene: BABYLON.Scene
     parent: BABYLON.TransformNode
     state: 'intro'|'running'|'passed'|'failed'
+
+    solved = false
+    failed = false
     
     constructor(scene: BABYLON.Scene) {
         this.scene = scene
@@ -28,13 +31,42 @@ export class TimerChallenge {
         this.parent.scaling = s
     }
 
+    isSolved() {
+        if (this.solved) return true
+        this.solved = this.clocks?.every((c) => c.state === 'passed') || false
+        if (this.solved) {
+            // TODO: Run the Success event
+
+        }
+        return this.solved
+    }
+
+    isFailed() {
+        if (this.failed) return true
+        let failedClocks = 0
+        this.clocks?.forEach((c) => {if (c.state === 'failed') failedClocks++})
+        this.failed = failedClocks >= 3
+
+        if (this.failed) {
+            // TODO: Run the failure event
+        }
+
+        return this.failed
+    }
+
     reset() {
+        this.solved = false
+        this.failed = false
         const BOX_SIZE = 12
         const BOX_HEIGHT = 6
         const CLOCK_COUNT = 13
         // Make the walls
         const color = BABYLON.Color3.Random()
-        const box2 = BABYLON.MeshBuilder.CreateBox(`box_2timer`, { 
+        const mat2 = new BABYLON.PBRMaterial("")
+        mat2.albedoColor = color
+        mat2.metallic = 0
+        mat2.roughness = 1
+        const box2 = BABYLON.MeshBuilder.CreateBox(`timer_challenge_box`, { 
             height: BOX_HEIGHT,
             width: BOX_SIZE,
             depth: BOX_SIZE,
@@ -43,11 +75,6 @@ export class TimerChallenge {
         box2.isPickable = false
         box2.setParent(this.parent)
         box2.position.y = 0.5 * BOX_HEIGHT + 0.01
-        const mat2 = new BABYLON.PBRMaterial("")
-        mat2.stencil.enabled = true
-        mat2.albedoColor = color
-        mat2.metallic = 0
-        mat2.roughness = 1
         box2.material = mat2
         box2.receiveShadows = true
         // Make an instructional sign
@@ -57,8 +84,9 @@ export class TimerChallenge {
         for (let i = 0; i < CLOCK_COUNT; i++) {
             const startTime = 30
             const difference = 5
-            const jitter = Math.random() * 500
+            const jitter = Math.random() * 0.5
             const c = new Clock({count: startTime + difference * i + jitter}, this.scene)
+            c.model.setParent(this.parent)
             // Place each clock on the wall
             const faceIndex = Math.floor(shuffledClockPositions[i] / (BOX_SIZE * BOX_HEIGHT))
             const clockPositionIndex = shuffledClockPositions[i] % (BOX_SIZE * BOX_HEIGHT)
@@ -70,8 +98,5 @@ export class TimerChallenge {
                 c.stop()
             }
         }
-
-        // Watch for the challenge to be complete
-        // Either through failed clocks or all passed
     }
 }
