@@ -33,7 +33,7 @@ export class Clock {
         this.endDt = this.startDt + (opts.count ? opts.count : 30) * 1000
         this.parent = new TransformNode('Clock', this.scene) as InteractiveMesh
         this.value = 0
-        this.state = 'running'
+        this.state = 'intro'
         this.target = opts.target || 13
         this.materials = {
             red: ColorMaterial("#ff0000", scene),
@@ -101,6 +101,7 @@ export class Clock {
     }
 
     start() {
+        console.log('clock starting')
         this.state = 'running'
         if (this.body) this.body.material = this.materials.blue
     }

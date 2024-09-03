@@ -1,12 +1,16 @@
-import { shuffle } from "@/core/Utils"
+import { TextMaterial } from "@/core/textures"
+import { debug, shuffle } from "@/core/Utils"
 import { Clock } from "@/meshes/Clock"
-const { TransformNode, Vector3 } = BABYLON
+import { InteractiveMesh } from "@/Types"
+const { TransformNode, Vector3, MeshBuilder } = BABYLON
 
 export class TimerChallenge {
-    clocks?: BABYLON.Mesh[]
+    state: 'intro'|'running'
     scene: BABYLON.Scene
+    
     parent: BABYLON.TransformNode
-    state: 'intro'|'running'|'passed'|'failed'
+    infoBillboard?: BABYLON.Mesh
+    clocks?: Clock[]
 
     solved = false
     failed = false
@@ -15,7 +19,7 @@ export class TimerChallenge {
         this.scene = scene
         this.parent = new TransformNode('TimerChallenge', this.scene)
         this.state = 'intro'
-        this.reset()
+        // this.reset()
     }
 
     
@@ -32,8 +36,15 @@ export class TimerChallenge {
     }
 
     isSolved() {
+        if (this.state !== 'running') return false
         if (this.solved) return true
-        this.solved = this.clocks?.every((c) => c.state === 'passed') || false
+        let failedClocks = 0
+        let runningClocks = 0
+        this.clocks?.forEach((c) => {
+            if (c.state === 'failed') failedClocks++
+            if (c.state === 'running') runningClocks++
+        })
+        this.solved = runningClocks == 0 && failedClocks < 3
         if (this.solved) {
             // TODO: Run the Success event
 
@@ -42,6 +53,7 @@ export class TimerChallenge {
     }
 
     isFailed() {
+        if (this.state !== 'running') return false
         if (this.failed) return true
         let failedClocks = 0
         this.clocks?.forEach((c) => {if (c.state === 'failed') failedClocks++})
@@ -55,18 +67,22 @@ export class TimerChallenge {
     }
 
     reset() {
+        this.parent.dispose()
+        this.state = 'intro'
         this.solved = false
         this.failed = false
+        this.clocks = []
         const BOX_SIZE = 12
         const BOX_HEIGHT = 6
-        const CLOCK_COUNT = 13
+        const CLOCK_COUNT = (debug) ? 1 : 13
+        
         // Make the walls
         const color = BABYLON.Color3.Random()
         const mat2 = new BABYLON.PBRMaterial("")
         mat2.albedoColor = color
         mat2.metallic = 0
         mat2.roughness = 1
-        const box2 = BABYLON.MeshBuilder.CreateBox(`timer_challenge_box`, { 
+        const box2 = MeshBuilder.CreateBox(`timer_challenge_box`, { 
             height: BOX_HEIGHT,
             width: BOX_SIZE,
             depth: BOX_SIZE,
@@ -77,8 +93,6 @@ export class TimerChallenge {
         box2.position.y = 0.5 * BOX_HEIGHT + 0.01
         box2.material = mat2
         box2.receiveShadows = true
-        // Make an instructional sign
-
         // Make clocks and position them around the room
         const shuffledClockPositions = shuffle([...Array(BOX_SIZE * BOX_HEIGHT * 4).keys()])
         for (let i = 0; i < CLOCK_COUNT; i++) {
@@ -97,6 +111,30 @@ export class TimerChallenge {
             c.model.onPointerPick = () => {
                 c.stop()
             }
+            this.clocks?.push(c)
         }
+        // Make an instructional sign
+        const infoBillboard = MeshBuilder.CreatePlane('billboard', {
+            width: 2,
+            height: 1,
+            sideOrientation: BABYLON.Mesh.DOUBLESIDE
+        }, this.scene) as InteractiveMesh
+        infoBillboard.material = TextMaterial(['Stop the clocks at 13 seconds.', 'Stop too soon or ', 'miss too many and you will fail'], this.scene)
+        infoBillboard.setParent(this.parent)
+        infoBillboard.isPickable = true
+        infoBillboard.position = new Vector3(0, 1.5, -0.126)
+        infoBillboard.onPointerPick = () => {
+            this.start()
+        }   
+        this.infoBillboard = infoBillboard
+    }
+    start() {
+        console.log('starting', this.clocks)
+        this.state = 'running'
+        this.infoBillboard?.setEnabled(false)
+        this.clocks?.forEach((c) => c.start())
+    }
+    stop() {
+        this.parent.setEnabled(false)
     }
 }

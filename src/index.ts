@@ -1,10 +1,9 @@
 import type { InteractiveMesh } from '@/Types'
-import { GrassMaterial, CursorMaterial, ColorMaterial } from './core/textures'
+import { GrassMaterial, CursorMaterial } from './core/textures'
 import { AnimationFactory } from './core/Animation'
 import { debug } from './core/Utils'
 import { TexturedMeshNME } from './shaders/TexturedMeshNME'
 import { SPANISH_BLUE, WHITE } from './core/Colors'
-import { GlobPortal } from './puzzles/GlobPortal'
 import { TimerChallenge } from './puzzles/TimerChallenge'
 
 
@@ -27,6 +26,7 @@ const init = async () => {
     const scene = new Scene(engine)
     let activePuzzle: TimerChallenge|null = null
     const puzzles = []
+    const puzzleBoxes: InteractiveMesh[] = []
     AnimationFactory.Instance.initScene(scene)
     scene.gravity = new Vector3(0, -0.15, 0)
     scene.collisionsEnabled = true
@@ -139,13 +139,32 @@ const init = async () => {
     // glob.position = Vector3.Zero()
 
     // Clock Challenge
-    puzzles.push(new TimerChallenge(scene))
-    activePuzzle = puzzles[0]
+    const timerChallenge = new TimerChallenge(scene)
+    timerChallenge.model.setEnabled(false)
+    puzzles.push(timerChallenge)
+    // activePuzzle = puzzles[0]
     
+    const timerBox = BABYLON.MeshBuilder.CreateBox('timerChallengeBox', {size: 0.3}, scene) as InteractiveMesh
+    timerBox.position = new Vector3(0, 2, 0)
+    timerBox.onPointerPick = () => {
+        activePuzzle = timerChallenge
+        timerChallenge.model.setEnabled(true)
+        timerChallenge.reset()
+        timerBox.setEnabled(false)
+    }
+    puzzleBoxes.push(timerBox)
+
     scene.registerBeforeRender(() => {
         if (!activePuzzle) return
-        activePuzzle.isSolved()
-        activePuzzle.isFailed()
+        if (activePuzzle.isSolved()) {
+            activePuzzle.stop()
+            activePuzzle = null
+            puzzleBoxes.forEach((p) => p.setEnabled(true))
+        } else if (activePuzzle.isFailed()) {
+            activePuzzle?.stop()
+            activePuzzle = null
+            puzzleBoxes.forEach((p) => p.setEnabled(true))
+        }
     })
 
     // *** BOUNDING BOX ***

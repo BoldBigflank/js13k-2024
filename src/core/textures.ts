@@ -362,13 +362,14 @@ export const TextMaterial = (lines: string[], scene: BABYLON.Scene) => {
     ctx.scale(1.0, lines.length)
     ctx.textBaseline = "top"
     ctx.textAlign = "left"
+    let fontSize = 64
     if (lines.length > 0) {
         const m = ctx.measureText(lines[0])
-        const fontSize = 64 * (512-64) / m.width
+        fontSize = 64 * (512-64) / m.width
         ctx.font = `${fontSize}px Helvetica`
     }
     lines.forEach((line, index) => {
-        ctx.fillText(`${line}`, 32, 32 + 72 * index)
+        ctx.fillText(`${line}`, 32, 32 + fontSize * index)
     })
     const material = CanvasMaterial(canvas, scene)
     textures[key] = material
