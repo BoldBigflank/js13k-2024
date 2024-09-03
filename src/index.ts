@@ -5,6 +5,7 @@ import { debug } from './core/Utils'
 import { TexturedMeshNME } from './shaders/TexturedMeshNME'
 import { SPANISH_BLUE, WHITE } from './core/Colors'
 import { TimerChallenge } from './puzzles/TimerChallenge'
+import { ButtonChallenge } from './puzzles/ButtonChallenge'
 
 
 const { Engine, Scene, MeshBuilder, HemisphericLight, UniversalCamera, Vector3, PointerEventTypes } = BABYLON
@@ -26,7 +27,7 @@ const init = async () => {
     const scene = new Scene(engine)
     let activePuzzle: TimerChallenge|null = null
     const puzzles = []
-    const puzzleBoxes: InteractiveMesh[] = []
+    const puzzleBoxes: BABYLON.TransformNode = new BABYLON.TransformNode('puzzleBoxes', scene)
     AnimationFactory.Instance.initScene(scene)
     scene.gravity = new Vector3(0, -0.15, 0)
     scene.collisionsEnabled = true
@@ -143,6 +144,10 @@ const init = async () => {
     timerChallenge.model.setEnabled(false)
     puzzles.push(timerChallenge)
     // activePuzzle = puzzles[0]
+
+    const buttonChallenge = new ButtonChallenge(scene)
+    buttonChallenge.model.setEnabled(false)
+    puzzles.push(buttonChallenge)
     
     const timerBox = BABYLON.MeshBuilder.CreateBox('timerChallengeBox', {size: 0.3}, scene) as InteractiveMesh
     timerBox.position = new Vector3(0, 2, 0)
@@ -150,20 +155,31 @@ const init = async () => {
         activePuzzle = timerChallenge
         timerChallenge.model.setEnabled(true)
         timerChallenge.reset()
-        timerBox.setEnabled(false)
+        puzzleBoxes.setEnabled(false)
     }
-    puzzleBoxes.push(timerBox)
+    timerBox.setParent(puzzleBoxes)
+
+    const buttonBox = BABYLON.MeshBuilder.CreateBox('timerChallengeBox', {size: 0.3}, scene) as InteractiveMesh
+    buttonBox.position = new Vector3(-1, 2, 0)
+    buttonBox.onPointerPick = () => {
+        activePuzzle = timerChallenge
+        buttonChallenge.model.setEnabled(true)
+        buttonChallenge.reset()
+        puzzleBoxes.setEnabled(false)
+    }
+    buttonBox.setParent(puzzleBoxes)
+
 
     scene.registerBeforeRender(() => {
         if (!activePuzzle) return
         if (activePuzzle.isSolved()) {
             activePuzzle.stop()
             activePuzzle = null
-            puzzleBoxes.forEach((p) => p.setEnabled(true))
+            puzzleBoxes.setEnabled(true)
         } else if (activePuzzle.isFailed()) {
             activePuzzle?.stop()
             activePuzzle = null
-            puzzleBoxes.forEach((p) => p.setEnabled(true))
+            puzzleBoxes.setEnabled(true)
         }
     })
 
