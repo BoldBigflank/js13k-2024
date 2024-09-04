@@ -36,9 +36,9 @@ export class Clock {
         this.state = 'intro'
         this.target = opts.target || 13
         this.materials = {
-            red: ColorMaterial("#ff0000", scene),
-            green: ColorMaterial("#BAD455", scene),
-            blue: ColorMaterial("#0000ff", scene)
+            red: ColorMaterial("#ff0000", {glow: true}, scene),
+            green: ColorMaterial("#BAD455", {glow: true}, scene),
+            blue: ColorMaterial("#0000ff", {glow: true}, scene)
         }
         this.reset()
     }

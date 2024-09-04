@@ -61,7 +61,7 @@ export class GlobPortal {
         box2.material = mat2
         box2.receiveShadows = true
         // Create some stuff inside
-        const boxMat = ColorMaterial(BABYLON.Color3.Random().toHexString(), this.scene)
+        const boxMat = ColorMaterial(BABYLON.Color3.Random().toHexString(), {}, this.scene)
         boxMat.stencil.enabled = true
         boxMat.stencil.funcRef = ref
         boxMat.stencil.func = BABYLON.Engine.EQUAL

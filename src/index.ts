@@ -25,6 +25,7 @@ const init = async () => {
     })
     const engine = new Engine(canvas, true)
     const scene = new Scene(engine)
+    const gl = new BABYLON.GlowLayer('glow', scene)
     let activePuzzle: TimerChallenge|null = null
     const puzzles = []
     const puzzleBoxes: BABYLON.TransformNode = new BABYLON.TransformNode('puzzleBoxes', scene)
@@ -159,10 +160,10 @@ const init = async () => {
     }
     timerBox.setParent(puzzleBoxes)
 
-    const buttonBox = BABYLON.MeshBuilder.CreateBox('timerChallengeBox', {size: 0.3}, scene) as InteractiveMesh
+    const buttonBox = BABYLON.MeshBuilder.CreateBox('buttonChallengeBox', {size: 0.3}, scene) as InteractiveMesh
     buttonBox.position = new Vector3(-1, 2, 0)
     buttonBox.onPointerPick = () => {
-        activePuzzle = timerChallenge
+        activePuzzle = buttonChallenge
         buttonChallenge.model.setEnabled(true)
         buttonChallenge.reset()
         puzzleBoxes.setEnabled(false)

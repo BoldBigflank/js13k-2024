@@ -55,7 +55,7 @@ export const CursorMaterial = (scene: BABYLON.Scene) => {
 
     const material = CanvasMaterial(canvas, scene)
     material.disableLighting = true
-    material.emissiveColor = BABYLON.Color3.White()
+    material.emissiveColor = BABYLON.Color3.Black()
     material.diffuseTexture!.hasAlpha = true
     textures[key] = material
     return material
@@ -216,12 +216,16 @@ export const GrassMaterial = (scene: BABYLON.Scene) => {
 
 /* HELPERS */
 
-export const ColorMaterial = (color: string, scene: BABYLON.Scene) => {
-    const key = `color${color}`
+type ColorOpts = {
+    glow?: boolean
+}
+
+export const ColorMaterial = (color: string, opts: ColorOpts, scene: BABYLON.Scene) => {
+    const key = `color${color}${(opts.glow) ? 'glow' : ''}`
     if (textures[key]) return textures[key]
     const material = new StandardMaterial(`billboardMaterial${++pc}`, scene)
     material.diffuseColor = BABYLON.Color3.FromHexString(color)
-    // material.emissiveColor = BABYLON.Color3.FromHexString(color)
+    if (opts.glow) material.emissiveColor = BABYLON.Color3.FromHexString(color)
     textures[key] = material
     return material
 }
