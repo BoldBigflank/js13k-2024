@@ -1,7 +1,13 @@
 import { ColorMaterial, TextMaterial } from '@/core/textures'
-import { debug, shuffle } from '@/core/Utils'
+import { shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
 const { TransformNode, Vector3, MeshBuilder } = BABYLON
+
+const BOX_HEIGHT = 12
+const BOX_SIZE = 6
+
+const RESET_BUTTONS = 5
+const CORRECT_BUTTONS = 13
 
 const infoText = [
     'Hit the correct buttons',
@@ -27,11 +33,83 @@ type LightPos = {
 
 class LightButton {
     connectedLights: LightPos[]
+    on: boolean
     constructor() {
         this.connectedLights = []
+        this.on = false
     }
     addLight(l: LightPos) {
         this.connectedLights.push(l)
+    }
+}
+
+class LightButtonPuzzle {
+    solution: number[][]
+    board: number[][]
+    solved: boolean
+    buttons: LightButton[]
+
+    constructor() {
+        this.solution = [...lightWallSolution]
+        this.board = []
+        this.solved = false
+        this.buttons = []
+        const correctLocations: { x: number; y: number }[] = []
+        for (let y = 0; y < this.solution.length; y++) {
+            for (let x = 0; x < this.solution[y].length; x++) {
+                if (this.solution[y][x] == 0) {
+                    correctLocations.push({ x, y })
+                }
+            }
+        }
+        shuffle(correctLocations)
+
+        for (let i = 0; i < CORRECT_BUTTONS; i++) {
+            // Correct buttons
+            this.buttons.push(new LightButton())
+        }
+        correctLocations.forEach((l, i) =>
+            this.buttons[i % this.buttons.length].addLight(l)
+        )
+        for (let i = 0; i < RESET_BUTTONS; i++) {
+            // Reset Buttons
+            this.buttons.push(new LightButton())
+        }
+        this.buttons = shuffle(this.buttons)
+        this.reset()
+    }
+
+    pressButton(index: number) {
+        const button = this.buttons[index]
+        if (button.on) return
+        if (!button.connectedLights.length) {
+            this.reset()
+            return
+        }
+        button.connectedLights.forEach((l) => {
+            this.board[l.y][l.x] = 0
+        })
+        button.on = true
+    }
+
+    isSolved() {
+        if (this.solved) return true
+        let solved = true
+        for (let y = 0; y < this.solution.length; y++) {
+            for (let x = 0; x < this.solution[y].length; x++) {
+                solved = solved && this.solution[y][x] == this.board[y][x]
+            }
+        }
+        if (solved) {
+            this.solved = true
+        }
+        return solved
+    }
+
+    reset() {
+        this.solved = false
+        this.buttons.forEach((b) => (b.on = false))
+        this.board = this.solution.map((y) => y.map(() => 1))
     }
 }
 
@@ -43,14 +121,14 @@ export class ButtonChallenge {
     lightsParent: BABYLON.TransformNode
     buttonsParent: BABYLON.TransformNode
     infoBillboard?: BABYLON.Mesh
-    buttonMeshes?: InteractiveMesh[]
-    lightWall: number[][]
 
+    puzzle: LightButtonPuzzle
     solved = false
     failed = false
 
     constructor(scene: BABYLON.Scene) {
         this.scene = scene
+        this.puzzle = new LightButtonPuzzle()
         this.parent = new TransformNode('ButtonChallenge', this.scene)
         this.lightsParent = new TransformNode('Lights', this.scene)
         this.lightsParent.setParent(this.parent)
@@ -64,12 +142,6 @@ export class ButtonChallenge {
         )
         this.buttonsParent.position = new Vector3(-0.5, 0.35, -2)
         this.state = 'intro'
-        // this.lightWall = Array.from({length: lightWallSolution[0].length}, () => {
-        //     Array.from({length: lightWallSolution.length}, () => 1)
-        // })
-        this.lightWall = []
-        console.log(this.lightWall)
-        // this.reset()
     }
 
     get model() {
@@ -87,36 +159,29 @@ export class ButtonChallenge {
     isSolved() {
         if (this.state !== 'running') return false
         if (this.solved) return true
-
+        if (this.puzzle.isSolved()) {
+            // Celebration
+            this.solved = true
+        }
         return this.solved
     }
 
     isFailed() {
         if (this.state !== 'running') return false
         if (this.failed) return true
-        let failedClocks = 0
-        this.buttonMeshes?.forEach((c) => {
-            if (c.state === 'failed') failedClocks++
-        })
-        this.failed = failedClocks >= 3
-
-        if (this.failed) {
-            // TODO: Run the failure event
-        }
 
         return this.failed
     }
 
     reset() {
-        this.parent.dispose()
+        // Remove the lights, buttons, walls
+        this.buttonsParent.dispose()
+        this.lightsParent.dispose()
         this.state = 'intro'
         this.solved = false
         this.failed = false
-        this.buttonMeshes = []
-        const RESET_BUTTONS = 5
-        const CORRECT_BUTTONS = 13
-        const BOX_SIZE = 12
-        const BOX_HEIGHT = 6
+
+        const { board, buttons } = this.puzzle
 
         // Make the walls
         const color = BABYLON.Color3.Random()
@@ -137,12 +202,9 @@ export class ButtonChallenge {
         box2.material = mat2
         box2.receiveShadows = true
 
-        // Make the light wall
-        this.lightWall = []
-        for (let y = 0; y < lightWallSolution.length; y++) {
-            this.lightWall.push([])
-            for (let x = 0; x < lightWallSolution[y].length; x++) {
-                this.lightWall[y].push(1) // Start all at 1
+        // Make the light meshes
+        for (let y = 0; y < board.length; y++) {
+            for (let x = 0; x < board[y].length; x++) {
                 // Prepare the mesh
                 const light = MeshBuilder.CreateSphere(
                     `light_${x}-${y}`,
@@ -151,17 +213,16 @@ export class ButtonChallenge {
                 )
                 light.material = ColorMaterial(
                     '#ffffff',
-                    { glow: lightWallSolution[y][x] === 1 },
+                    { glow: board[y][x] === 1 },
                     this.scene
                 )
                 light.setParent(this.lightsParent)
                 light.position = new Vector3(x * 0.3, y * -0.3, 1)
             }
         }
-        console.log(this.lightWall)
 
-        // Make buttons
-        for (let i = 0; i < RESET_BUTTONS + CORRECT_BUTTONS; i++) {
+        // Make button meshes
+        for (let i = 0; i < buttons.length; i++) {
             const size = Math.floor(Math.random() * 3) * 0.075 + 0.2
             const color = BABYLON.Color3.Random()
             const mat2 = new BABYLON.PBRMaterial('')
@@ -182,9 +243,9 @@ export class ButtonChallenge {
                 (i % 4) * 0.25
             )
             button.onPointerPick = () => {
-                if (i > CORRECT_BUTTONS) {
-                    // Reset the light wall
-                }
+                this.start()
+                this.puzzle.pressButton(i)
+                this.updateMeshes()
             }
         }
 
@@ -207,11 +268,38 @@ export class ButtonChallenge {
         }
         this.infoBillboard = infoBillboard
     }
+
+    updateMeshes() {
+        // Update lights
+        const { board, buttons } = this.puzzle
+        board.forEach((row, y) => {
+            row.forEach((val, x) => {
+                const lightMesh = this.scene.getMeshByName(`light_${x}-${y}`)
+                if (!lightMesh) return
+                lightMesh.material = ColorMaterial(
+                    '#ffffff',
+                    { glow: val === 1 },
+                    this.scene
+                )
+            })
+        })
+        // Update buttons
+        buttons.forEach((button, i) => {
+            const buttonMesh = this.scene.getMeshByName(`button_${i}`)
+            if (!buttonMesh) return
+            const mat = ColorMaterial(
+                '#ffffff',
+                { glow: button.on },
+                this.scene
+            )
+            buttonMesh.material = mat
+        })
+    }
+
     start() {
-        console.log('starting', this.buttonMeshes)
+        if (this.state !== 'intro') return
         this.state = 'running'
         this.infoBillboard?.setEnabled(false)
-        // this.buttons?.forEach((c) => c.start())
     }
     stop() {
         this.parent.setEnabled(false)
