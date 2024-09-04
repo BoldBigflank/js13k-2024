@@ -1,9 +1,6 @@
 import { TextMaterial } from '@/core/textures'
 
-const { TransformNode, 
-    MeshBuilder,
-    Vector3
-} = BABYLON
+const { TransformNode, MeshBuilder, Vector3 } = BABYLON
 let pc = 0
 
 export class InfoBillboard {
@@ -14,11 +11,15 @@ export class InfoBillboard {
     constructor(scene: BABYLON.Scene) {
         this.scene = scene
         this.parent = new TransformNode(`InfoBillboard${++pc}`, scene)
-        this.billboard = MeshBuilder.CreatePlane('billboard', {
-            width: 3,
-            height: 1,
-            sideOrientation: BABYLON.Mesh.DOUBLESIDE
-        }, scene)
+        this.billboard = MeshBuilder.CreatePlane(
+            'billboard',
+            {
+                width: 3,
+                height: 1,
+                sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+            },
+            scene
+        )
 
         // this.billboard.material = TextMaterial(lines, scene)
         this.billboard.setParent(this.parent)
@@ -32,11 +33,14 @@ export class InfoBillboard {
     }
 
     setEndgame = () => {
-        this.billboard.material = TextMaterial(["Thanks for playing!"], this.scene)
+        this.billboard.material = TextMaterial(
+            ['Thanks for playing!'],
+            this.scene
+        )
         this.billboard.rotation = Vector3.Zero()
         this.billboard.renderingGroupId = 1
     }
-    
+
     set position(pos: BABYLON.Vector3) {
         this.parent.position = pos
     }
@@ -45,11 +49,10 @@ export class InfoBillboard {
         this.billboard.rotation = rot
     }
 
-
     get model() {
         return this.parent
     }
-} 
+}
 
 // (lines: string[], scene: BABYLON.Scene) => {
 //     const parent = new TransformNode(`InfoBillboard${++pc}`, scene)

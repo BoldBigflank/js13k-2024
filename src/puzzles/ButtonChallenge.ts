@@ -1,38 +1,54 @@
-import { ColorMaterial, TextMaterial } from "@/core/textures"
-import { debug, shuffle } from "@/core/Utils"
-import { InteractiveMesh } from "@/Types"
+import { ColorMaterial, TextMaterial } from '@/core/textures'
+import { debug, shuffle } from '@/core/Utils'
+import { InteractiveMesh } from '@/Types'
 const { TransformNode, Vector3, MeshBuilder } = BABYLON
 
 const infoText = [
-    'Hit the correct buttons', 
-    'to reveal the answer.', 
-    'Beware RESET buttons.'
+    'Hit the correct buttons',
+    'to reveal the answer.',
+    'Beware RESET buttons.',
 ]
 
-const lightWall = [
-    [0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,0,0,1,1,0,0,1,1,1,0,0,0],
-    [0,0,0,0,1,0,0,0,0,0,1,0,0],
-    [0,0,0,0,1,0,0,0,1,1,0,0,0],
-    [0,0,0,0,1,0,0,0,0,0,1,0,0],
-    [0,0,0,0,1,0,0,1,0,0,1,0,0],
-    [0,0,1,1,1,1,0,0,1,1,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0]
+const lightWallSolution = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+    [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ]
+
+type LightPos = {
+    x: number
+    y: number
+}
+
+class LightButton {
+    connectedLights: LightPos[]
+    constructor() {
+        this.connectedLights = []
+    }
+    addLight(l: LightPos) {
+        this.connectedLights.push(l)
+    }
+}
 
 export class ButtonChallenge {
-    state: 'intro'|'running'
+    state: 'intro' | 'running'
     scene: BABYLON.Scene
-    
+
     parent: BABYLON.TransformNode
     lightsParent: BABYLON.TransformNode
     buttonsParent: BABYLON.TransformNode
     infoBillboard?: BABYLON.Mesh
-    buttons?: InteractiveMesh[]
+    buttonMeshes?: InteractiveMesh[]
+    lightWall: number[][]
 
     solved = false
     failed = false
-    
+
     constructor(scene: BABYLON.Scene) {
         this.scene = scene
         this.parent = new TransformNode('ButtonChallenge', this.scene)
@@ -41,13 +57,21 @@ export class ButtonChallenge {
         this.lightsParent.position = new Vector3(-1.5, 3, 0)
         this.buttonsParent = new TransformNode('Buttons', this.scene)
         this.buttonsParent.setParent(this.parent)
-        this.buttonsParent.rotateAround(Vector3.Zero(), Vector3.Right(), Math.PI * -0.15 )
+        this.buttonsParent.rotateAround(
+            Vector3.Zero(),
+            Vector3.Right(),
+            Math.PI * -0.15
+        )
         this.buttonsParent.position = new Vector3(-0.5, 0.35, -2)
         this.state = 'intro'
+        // this.lightWall = Array.from({length: lightWallSolution[0].length}, () => {
+        //     Array.from({length: lightWallSolution.length}, () => 1)
+        // })
+        this.lightWall = []
+        console.log(this.lightWall)
         // this.reset()
     }
 
-    
     get model() {
         return this.parent
     }
@@ -63,7 +87,7 @@ export class ButtonChallenge {
     isSolved() {
         if (this.state !== 'running') return false
         if (this.solved) return true
-        
+
         return this.solved
     }
 
@@ -71,7 +95,9 @@ export class ButtonChallenge {
         if (this.state !== 'running') return false
         if (this.failed) return true
         let failedClocks = 0
-        this.buttons?.forEach((c) => {if (c.state === 'failed') failedClocks++})
+        this.buttonMeshes?.forEach((c) => {
+            if (c.state === 'failed') failedClocks++
+        })
         this.failed = failedClocks >= 3
 
         if (this.failed) {
@@ -86,23 +112,24 @@ export class ButtonChallenge {
         this.state = 'intro'
         this.solved = false
         this.failed = false
-        this.buttons = []
+        this.buttonMeshes = []
         const RESET_BUTTONS = 5
         const CORRECT_BUTTONS = 13
         const BOX_SIZE = 12
         const BOX_HEIGHT = 6
-        
+
         // Make the walls
         const color = BABYLON.Color3.Random()
-        const mat2 = new BABYLON.PBRMaterial("")
+        const mat2 = new BABYLON.PBRMaterial('')
         mat2.albedoColor = color
         mat2.metallic = 0
         mat2.roughness = 1
-        const box2 = MeshBuilder.CreateBox(`button_challenge_box`, { 
+        const box2 = MeshBuilder.CreateBox(`button_challenge_box`, {
             height: BOX_HEIGHT,
             width: BOX_SIZE,
             depth: BOX_SIZE,
-            sideOrientation: 1 })
+            sideOrientation: 1,
+        })
         box2.checkCollisions = true
         box2.isPickable = false
         box2.setParent(this.parent)
@@ -111,28 +138,49 @@ export class ButtonChallenge {
         box2.receiveShadows = true
 
         // Make the light wall
-        for(let y = 0; y < lightWall.length; y++) {
-            for (let x = 0; x < lightWall[y].length; x++) {
-                const light = MeshBuilder.CreateSphere(`light_${x}-${y}`, { diameter: 0.3 }, this.scene)
-                light.material = ColorMaterial("#ffffff", {glow: lightWall[y][x] === 1}, this.scene)
+        this.lightWall = []
+        for (let y = 0; y < lightWallSolution.length; y++) {
+            this.lightWall.push([])
+            for (let x = 0; x < lightWallSolution[y].length; x++) {
+                this.lightWall[y].push(1) // Start all at 1
+                // Prepare the mesh
+                const light = MeshBuilder.CreateSphere(
+                    `light_${x}-${y}`,
+                    { diameter: 0.3 },
+                    this.scene
+                )
+                light.material = ColorMaterial(
+                    '#ffffff',
+                    { glow: lightWallSolution[y][x] === 1 },
+                    this.scene
+                )
                 light.setParent(this.lightsParent)
                 light.position = new Vector3(x * 0.3, y * -0.3, 1)
             }
         }
+        console.log(this.lightWall)
 
         // Make buttons
         for (let i = 0; i < RESET_BUTTONS + CORRECT_BUTTONS; i++) {
             const size = Math.floor(Math.random() * 3) * 0.075 + 0.2
             const color = BABYLON.Color3.Random()
-            const mat2 = new BABYLON.PBRMaterial("")
+            const mat2 = new BABYLON.PBRMaterial('')
             mat2.albedoColor = color
             mat2.metallic = 0
             mat2.roughness = 1
             // Shape
-            const button = MeshBuilder.CreateBox(`button_${i}`, {width: size, depth: size, height: 0.1}, this.scene) as InteractiveMesh
+            const button = MeshBuilder.CreateBox(
+                `button_${i}`,
+                { width: size, depth: size, height: 0.1 },
+                this.scene
+            ) as InteractiveMesh
             button.material = mat2
             button.setParent(this.buttonsParent)
-            button.position = new Vector3(Math.floor(i / 4) * 0.35, 0.5, i % 4 * 0.25)
+            button.position = new Vector3(
+                Math.floor(i / 4) * 0.35,
+                0.5,
+                (i % 4) * 0.25
+            )
             button.onPointerPick = () => {
                 if (i > CORRECT_BUTTONS) {
                     // Reset the light wall
@@ -140,24 +188,27 @@ export class ButtonChallenge {
             }
         }
 
-
         // Make an instructional sign
-        const infoBillboard = MeshBuilder.CreatePlane('billboard', {
-            width: 2,
-            height: 1,
-            sideOrientation: BABYLON.Mesh.DOUBLESIDE
-        }, this.scene) as InteractiveMesh
+        const infoBillboard = MeshBuilder.CreatePlane(
+            'billboard',
+            {
+                width: 2,
+                height: 1,
+                sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+            },
+            this.scene
+        ) as InteractiveMesh
         infoBillboard.material = TextMaterial(infoText, this.scene)
         infoBillboard.setParent(this.parent)
         infoBillboard.isPickable = true
         infoBillboard.position = new Vector3(0, 1.5, -0.126)
         infoBillboard.onPointerPick = () => {
             this.start()
-        }   
+        }
         this.infoBillboard = infoBillboard
     }
     start() {
-        console.log('starting', this.buttons)
+        console.log('starting', this.buttonMeshes)
         this.state = 'running'
         this.infoBillboard?.setEnabled(false)
         // this.buttons?.forEach((c) => c.start())

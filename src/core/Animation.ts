@@ -1,8 +1,8 @@
-import { AnimationTransform, AnimateTransformOpts } from "@/Types"
-import { Clamp } from "./Utils"
+import { AnimationTransform, AnimateTransformOpts } from '@/Types'
+import { Clamp } from './Utils'
 
 type Animating = {
-    mesh: BABYLON.Mesh|BABYLON.TransformNode
+    mesh: BABYLON.Mesh | BABYLON.TransformNode
     start: AnimationTransform
     end: AnimationTransform
     easeFunc: BABYLON.EasingFunction
@@ -13,13 +13,13 @@ type Animating = {
 export class AnimationFactory {
     private static _instance: AnimationFactory
     private animations: Animating[]
-    private scene: BABYLON.Scene|null
+    private scene: BABYLON.Scene | null
 
-    private constructor() { 
+    private constructor() {
         this.animations = []
         this.scene = null
     }
-    
+
     public static get Instance(): AnimationFactory {
         if (!AnimationFactory._instance) {
             AnimationFactory._instance = new AnimationFactory()
@@ -38,27 +38,33 @@ export class AnimationFactory {
                 const lerpAmount = Clamp(msElapsed / duration, 0, 1)
                 // It's over
                 if (now >= animation.endTime) {
-                    if (animation.end.position) animation.mesh.position = animation.end.position
-                    if (animation.end.rotation) animation.mesh.rotation = animation.end.rotation
-                    if (animation.end.scaling) animation.mesh.scaling = animation.end.scaling
+                    if (animation.end.position)
+                        animation.mesh.position = animation.end.position
+                    if (animation.end.rotation)
+                        animation.mesh.rotation = animation.end.rotation
+                    if (animation.end.scaling)
+                        animation.mesh.scaling = animation.end.scaling
                     return false
                 }
 
-                if (animation.end.position) animation.mesh.position = BABYLON.Vector3.Lerp(
-                    animation.start.position!,
-                    animation.end.position, 
-                    animation.easeFunc.ease(lerpAmount)
-                )
-                if (animation.end.rotation) animation.mesh.rotation = BABYLON.Vector3.Lerp(
-                    animation.start.rotation!,
-                    animation.end.rotation, 
-                    animation.easeFunc.ease(lerpAmount)
-                )
-                if (animation.end.scaling) animation.mesh.scaling = BABYLON.Vector3.Lerp(
-                    animation.start.scaling!,
-                    animation.end.scaling, 
-                    animation.easeFunc.ease(lerpAmount)
-                )
+                if (animation.end.position)
+                    animation.mesh.position = BABYLON.Vector3.Lerp(
+                        animation.start.position!,
+                        animation.end.position,
+                        animation.easeFunc.ease(lerpAmount)
+                    )
+                if (animation.end.rotation)
+                    animation.mesh.rotation = BABYLON.Vector3.Lerp(
+                        animation.start.rotation!,
+                        animation.end.rotation,
+                        animation.easeFunc.ease(lerpAmount)
+                    )
+                if (animation.end.scaling)
+                    animation.mesh.scaling = BABYLON.Vector3.Lerp(
+                        animation.start.scaling!,
+                        animation.end.scaling,
+                        animation.easeFunc.ease(lerpAmount)
+                    )
                 return true
             })
         })
@@ -72,16 +78,16 @@ export class AnimationFactory {
         const now = Date.now()
 
         this.animations.push({
-            mesh, 
+            mesh,
             start: {
                 position: mesh.position,
                 rotation: mesh.rotation,
-                scaling: mesh.scaling
+                scaling: mesh.scaling,
             },
             end,
             easeFunc: ease,
             startTime: now + delay,
-            endTime: now + delay + duration
+            endTime: now + delay + duration,
         })
     }
 }

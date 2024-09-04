@@ -21,15 +21,16 @@ import {
     MID_GREY,
     ORANGE,
     SPANISH_BLUE,
-    WHITE } from "./Colors"
-import { initCanvas, sample, shuffle } from "./Utils"
+    WHITE,
+} from './Colors'
+import { initCanvas, sample, shuffle } from './Utils'
 
-const { StandardMaterial, Texture} = BABYLON
+const { StandardMaterial, Texture } = BABYLON
 
 let pc = 0
 
 /* NEW TEXTURES */
-const textures: Record<string,BABYLON.Material> = {}
+const textures: Record<string, BABYLON.Material> = {}
 
 export const CursorMaterial = (scene: BABYLON.Scene) => {
     const key = 'cursor'
@@ -38,35 +39,44 @@ export const CursorMaterial = (scene: BABYLON.Scene) => {
     const [canvas, ctx] = initCanvas(512)
     ctx.imageSmoothingEnabled = false
     // TODO: Draw out a cursor
-    ctx.lineCap = "round"
+    ctx.lineCap = 'square'
     ctx.beginPath()
-    ctx.moveTo(256 - 6, 256) // Horiz
-    ctx.lineTo(256 + 6, 256)
-    ctx.moveTo(256, 256 - 6) // Vert
-    ctx.lineTo(256, 256 + 6)
+    ctx.moveTo(256 - 7, 256) // Left
+    ctx.lineTo(256 - 5, 256)
+    ctx.moveTo(256 + 5, 256) // Right
+    ctx.lineTo(256 + 7, 256)
+
+    ctx.moveTo(256, 256 - 7) // Up
+    ctx.lineTo(256, 256 - 5)
+    ctx.moveTo(256, 256 + 5) // Down
+    ctx.lineTo(256, 256 + 7)
+
     // Outer
-    ctx.lineWidth = 2
+    ctx.lineWidth = 4
     ctx.strokeStyle = BLACK
     ctx.stroke()
     // Inner
-    ctx.lineWidth = 1.5
+    ctx.lineWidth = 2
     ctx.strokeStyle = WHITE
     ctx.stroke()
 
     const material = CanvasMaterial(canvas, scene)
     material.disableLighting = true
-    material.emissiveColor = BABYLON.Color3.Black()
+    material.emissiveColor = BABYLON.Color3.White()
     material.diffuseTexture!.hasAlpha = true
     textures[key] = material
     return material
 }
 
-
-export const CastleMaterial = (windows = true, scale: number, scene: BABYLON.Scene) => {
+export const CastleMaterial = (
+    windows = true,
+    scale: number,
+    scene: BABYLON.Scene
+) => {
     const key = `castle${scale}`
     if (textures[key]) return textures[key]
     // Setup
-    const [canvas,ctx] = initCanvas(512)
+    const [canvas, ctx] = initCanvas(512)
 
     ctx.fillStyle = '#c5a296'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -78,22 +88,20 @@ export const CastleMaterial = (windows = true, scale: number, scene: BABYLON.Sce
     ctx.strokeStyle = BLACK
     ctx.lineWidth = 4
 
-    const brickColors = [
-        BRICK1,
-        BRICK2,
-        BRICK3,
-        BRICK4,
-        BRICK5
-    ]
-
+    const brickColors = [BRICK1, BRICK2, BRICK3, BRICK4, BRICK5]
 
     // TODO: Brick size based on orig
 
     for (let y = 0; y * brickHeight < canvas.height; y++) {
         for (let x = 0; x * brickWidth < canvas.width; x++) {
             ctx.fillStyle = sample(brickColors)
-            const startOffset = (y % 2) ? 0 : -0.5 * brickWidth
-            ctx.fillRect(x * brickWidth + startOffset, y * brickHeight, brickWidth - 1, brickHeight - 1)
+            const startOffset = y % 2 ? 0 : -0.5 * brickWidth
+            ctx.fillRect(
+                x * brickWidth + startOffset,
+                y * brickHeight,
+                brickWidth - 1,
+                brickHeight - 1
+            )
             if (x === 0) {
                 ctx.fillRect(
                     x * brickWidth + canvas.width + startOffset,
@@ -112,7 +120,7 @@ export const CastleMaterial = (windows = true, scale: number, scene: BABYLON.Sce
         ctx.fillRect(192, 128, 128, 256)
         ctx.strokeStyle = WHITE
         ctx.lineWidth = 16
-        ctx.strokeRect(192,128,128, 256)
+        ctx.strokeRect(192, 128, 128, 256)
         ctx.beginPath()
         ctx.moveTo(256, 128) // vertical line
         ctx.lineTo(256, 384)
@@ -138,19 +146,13 @@ export const GrassMaterial = (scene: BABYLON.Scene) => {
     // Horizontal lines
     tempCtx.save()
 
-    const grassColors = [
-        GRASS1,
-        GRASS2,
-        GRASS3,
-        GRASS4,
-        GRASS5
-    ]
+    const grassColors = [GRASS1, GRASS2, GRASS3, GRASS4, GRASS5]
 
     // Take all positions
     const positions = []
     for (let y = 0; y < GRASS_COUNT; y++) {
         for (let x = 0; x < GRASS_COUNT; x++) {
-            positions.push({x, y})
+            positions.push({ x, y })
         }
     }
     const shuffledPositions = shuffle(positions)
@@ -166,7 +168,12 @@ export const GrassMaterial = (scene: BABYLON.Scene) => {
         tempCtx.scale(scale, scale)
         tempCtx.rotate(rotation) // half circle bc it's the same as 2pi
         // Seamless repeating
-        tempCtx.fillRect(-0.5 * GRASS_SIZE, -0.5 * GRASS_SIZE, GRASS_SIZE, GRASS_SIZE)
+        tempCtx.fillRect(
+            -0.5 * GRASS_SIZE,
+            -0.5 * GRASS_SIZE,
+            GRASS_SIZE,
+            GRASS_SIZE
+        )
         tempCtx.restore()
 
         if (x == 0) {
@@ -176,7 +183,12 @@ export const GrassMaterial = (scene: BABYLON.Scene) => {
             tempCtx.scale(scale, scale)
             tempCtx.rotate(rotation) // half circle bc it's the same as 2pi
             // Seamless repeating
-            tempCtx.fillRect(-0.5 * GRASS_SIZE, -0.5 * GRASS_SIZE, GRASS_SIZE, GRASS_SIZE)
+            tempCtx.fillRect(
+                -0.5 * GRASS_SIZE,
+                -0.5 * GRASS_SIZE,
+                GRASS_SIZE,
+                GRASS_SIZE
+            )
             tempCtx.restore()
             tempCtx.restore()
         }
@@ -187,7 +199,12 @@ export const GrassMaterial = (scene: BABYLON.Scene) => {
             tempCtx.scale(scale, scale)
             tempCtx.rotate(rotation) // half circle bc it's the same as 2pi
             // Seamless repeating
-            tempCtx.fillRect(-0.5 * GRASS_SIZE, -0.5 * GRASS_SIZE, GRASS_SIZE, GRASS_SIZE)
+            tempCtx.fillRect(
+                -0.5 * GRASS_SIZE,
+                -0.5 * GRASS_SIZE,
+                GRASS_SIZE,
+                GRASS_SIZE
+            )
             tempCtx.restore()
             tempCtx.restore()
         }
@@ -220,8 +237,12 @@ type ColorOpts = {
     glow?: boolean
 }
 
-export const ColorMaterial = (color: string, opts: ColorOpts, scene: BABYLON.Scene) => {
-    const key = `color${color}${(opts.glow) ? 'glow' : ''}`
+export const ColorMaterial = (
+    color: string,
+    opts: ColorOpts,
+    scene: BABYLON.Scene
+) => {
+    const key = `color${color}${opts.glow ? 'glow' : ''}`
     if (textures[key]) return textures[key]
     const material = new StandardMaterial(`billboardMaterial${++pc}`, scene)
     material.diffuseColor = BABYLON.Color3.FromHexString(color)
@@ -236,23 +257,40 @@ export const ColorTextureMaterial = (color: string, scene: BABYLON.Scene) => {
     const material = new StandardMaterial(`billboardMaterial${++pc}`, scene)
     material.diffuseColor = BABYLON.Color3.FromHexString(color)
     const canvas = PerlinNoise()
-    const texture = Texture.LoadFromDataString(`texture${++pc}`, canvas.toDataURL(), scene)
+    const texture = Texture.LoadFromDataString(
+        `texture${++pc}`,
+        canvas.toDataURL(),
+        scene
+    )
     material.diffuseColor = BABYLON.Color3.FromHexString(color)
     material.diffuseTexture = texture
     textures[key] = material
     return material
 }
 
-export const CanvasMaterial = (canvas: HTMLCanvasElement, scene: BABYLON.Scene) => {
+export const CanvasMaterial = (
+    canvas: HTMLCanvasElement,
+    scene: BABYLON.Scene
+) => {
     const material = new StandardMaterial(`material${++pc}`, scene)
-    const texture = Texture.LoadFromDataString(`texture${++pc}`, canvas.toDataURL(), scene)
+    const texture = Texture.LoadFromDataString(
+        `texture${++pc}`,
+        canvas.toDataURL(),
+        scene
+    )
     texture.hasAlpha = true
     material.diffuseTexture = texture
     return material
 }
 
 // Used for Flower Puzzles
-export const GridMaterial = (color1: string, color2: string, rows: number, columns: number, scene: BABYLON.Scene) => {
+export const GridMaterial = (
+    color1: string,
+    color2: string,
+    rows: number,
+    columns: number,
+    scene: BABYLON.Scene
+) => {
     const key = `grid-${color1}-${color2}-${rows}-${columns}`
     if (textures[key]) return textures[key]
     const canvasSize = 512
@@ -271,7 +309,11 @@ export const GridMaterial = (color1: string, color2: string, rows: number, colum
     }
 
     const material = new StandardMaterial(`material${++pc}`, scene)
-    const texture = Texture.LoadFromDataString(`texture${++pc}`, canvas.toDataURL(), scene)
+    const texture = Texture.LoadFromDataString(
+        `texture${++pc}`,
+        canvas.toDataURL(),
+        scene
+    )
     material.diffuseTexture = texture
     textures[key] = material
     return material
@@ -299,7 +341,7 @@ export const GravelMaterial = (scene: BABYLON.Scene) => {
     const key = 'gravel'
     if (textures[key]) return textures[key]
     // Setup
-    const [canvas,ctx] = initCanvas(512)
+    const [canvas, ctx] = initCanvas(512)
 
     ctx.fillStyle = '#c5a296'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -309,9 +351,7 @@ export const GravelMaterial = (scene: BABYLON.Scene) => {
     ctx.strokeStyle = BLACK
     ctx.lineWidth = 4
 
-    const colors = [
-        GRAVEL1, GRAVEL2, GRAVEL3, GRAVEL4, GRAVEL5
-    ]
+    const colors = [GRAVEL1, GRAVEL2, GRAVEL3, GRAVEL4, GRAVEL5]
 
     ctx.fillStyle = GRAVEL0
     ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -342,12 +382,16 @@ export const DialMaterial = (alphabet: string[], scene: BABYLON.Scene) => {
     const tileWidth = canvas.width / alphabet.length
     ctx.font = `${tileWidth}px Helvetica`
     ctx.scale(1.0, canvas.height / tileWidth)
-    ctx.textBaseline = "middle"
-    ctx.textAlign = "center"
+    ctx.textBaseline = 'middle'
+    ctx.textAlign = 'center'
     alphabet.forEach((char, index) => {
         ctx.strokeStyle = MID_GREY
-        ctx.strokeRect(index * tileWidth, 0, (index+1) * tileWidth, tileWidth)
-        ctx.fillText(`${char}`, index * tileWidth + 0.5 * tileWidth, 0.5 * tileWidth)
+        ctx.strokeRect(index * tileWidth, 0, (index + 1) * tileWidth, tileWidth)
+        ctx.fillText(
+            `${char}`,
+            index * tileWidth + 0.5 * tileWidth,
+            0.5 * tileWidth
+        )
     })
     const material = CanvasMaterial(canvas, scene)
     textures[key] = material
@@ -355,21 +399,21 @@ export const DialMaterial = (alphabet: string[], scene: BABYLON.Scene) => {
 }
 
 export const TextMaterial = (lines: string[], scene: BABYLON.Scene) => {
-    const key = `text-${lines.join("")}`
+    const key = `text-${lines.join('')}`
     if (textures[key]) return textures[key]
     const [canvas, ctx] = initCanvas(512)
     ctx.fillStyle = ORANGE
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.fillStyle = BLACK
-    
+
     ctx.font = `64px Helvetica`
     ctx.scale(1.0, lines.length)
-    ctx.textBaseline = "top"
-    ctx.textAlign = "left"
+    ctx.textBaseline = 'top'
+    ctx.textAlign = 'left'
     let fontSize = 64
     if (lines.length > 0) {
         const m = ctx.measureText(lines[0])
-        fontSize = 64 * (512-64) / m.width
+        fontSize = (64 * (512 - 64)) / m.width
         ctx.font = `${fontSize}px Helvetica`
     }
     lines.forEach((line, index) => {
@@ -379,7 +423,6 @@ export const TextMaterial = (lines: string[], scene: BABYLON.Scene) => {
     textures[key] = material
     return material
 }
-
 
 export const SymbolMaterial = (scene: BABYLON.Scene) => {
     const key = 'symbol'
@@ -408,13 +451,18 @@ export const SymbolMaterial = (scene: BABYLON.Scene) => {
 export const PerlinNoise = () => {
     const size = 512
     const [noiseCanvas, noiseCtx] = initCanvas(size)
-    const imageData = noiseCtx.getImageData(0, 0, noiseCanvas.width, noiseCanvas.height)
+    const imageData = noiseCtx.getImageData(
+        0,
+        0,
+        noiseCanvas.width,
+        noiseCanvas.height
+    )
     const pixels = imageData.data
     const n = pixels.length
     const alpha = 255
     for (let i = 0; i < n; i += 4) {
-        pixels[i] = pixels [i+1] = pixels[i+2] = (Math.random() * 256) | 0
-        pixels[i+3] = alpha
+        pixels[i] = pixels[i + 1] = pixels[i + 2] = (Math.random() * 256) | 0
+        pixels[i + 3] = alpha
     }
     noiseCtx.putImageData(imageData, 0, 0)
 
@@ -424,7 +472,17 @@ export const PerlinNoise = () => {
         const x = (Math.random() * (noiseCanvas.width - size)) | 0
         const y = (Math.random() * (noiseCanvas.height - size)) | 0
         ctx.globalAlpha = 4 / size
-        ctx.drawImage(noiseCanvas, x, y, size, size, 0, 0, canvas.width, canvas.height)
+        ctx.drawImage(
+            noiseCanvas,
+            x,
+            y,
+            size,
+            size,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        )
     }
 
     ctx.restore()

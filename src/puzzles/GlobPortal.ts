@@ -16,7 +16,6 @@ export class GlobPortal {
         this.reset()
     }
 
-    
     get model() {
         return this.parent
     }
@@ -33,7 +32,10 @@ export class GlobPortal {
         const boxSize = 6
         // Create the container
         const ref = 1 // TODO: Increment
-        const sphere = BABYLON.MeshBuilder.CreateSphere(`${ref}`, { sideOrientation: 1, diameter: 0.5 })
+        const sphere = BABYLON.MeshBuilder.CreateSphere(`${ref}`, {
+            sideOrientation: 1,
+            diameter: 0.5,
+        })
         sphere.isPickable = false
         sphere.position.y = 1.65
         const mat = new BABYLON.StandardMaterial(`${ref}`)
@@ -43,15 +45,18 @@ export class GlobPortal {
         mat.stencil.funcRef = ref
         mat.disableDepthWrite = true // These two make this object the portal shape
         mat.disableColorWrite = true
-        
+
         // Create the inner portal
         // Create the walls
         const color = BABYLON.Color3.Random()
-        const box2 = BABYLON.MeshBuilder.CreateBox(`box_2${ref}`, { size: boxSize, sideOrientation: 1 })
+        const box2 = BABYLON.MeshBuilder.CreateBox(`box_2${ref}`, {
+            size: boxSize,
+            sideOrientation: 1,
+        })
         box2.isPickable = false
         box2.setParent(this.parent)
         box2.position.y = 0.5 * boxSize + 0.01
-        const mat2 = new BABYLON.PBRMaterial("")
+        const mat2 = new BABYLON.PBRMaterial('')
         mat2.stencil.enabled = true
         mat2.stencil.funcRef = ref
         mat2.stencil.func = BABYLON.Engine.EQUAL
@@ -61,12 +66,18 @@ export class GlobPortal {
         box2.material = mat2
         box2.receiveShadows = true
         // Create some stuff inside
-        const boxMat = ColorMaterial(BABYLON.Color3.Random().toHexString(), {}, this.scene)
+        const boxMat = ColorMaterial(
+            BABYLON.Color3.Random().toHexString(),
+            {},
+            this.scene
+        )
         boxMat.stencil.enabled = true
         boxMat.stencil.funcRef = ref
         boxMat.stencil.func = BABYLON.Engine.EQUAL
         for (let i = 0; i < 5; i++) {
-            const box = BABYLON.MeshBuilder.CreateBox(`box-${ref}-${i}`, {size: 0.25})
+            const box = BABYLON.MeshBuilder.CreateBox(`box-${ref}-${i}`, {
+                size: 0.25,
+            })
             box.isPickable = false
             box.material = boxMat
             box.setParent(this.parent)

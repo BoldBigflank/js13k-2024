@@ -20,14 +20,6 @@ module.exports = {
     },
     ignorePatterns: ["bundle.js", "**/vendor/*.js"],
     rules: {
-        semi: ['error', 'never'],
-
-        indent: ['error', 4, {
-            SwitchCase: 0
-        }],
-
-        'comma-dangle': ['error', 'never'],
-
         'max-len': ['warn', 120],
 
         'space-before-function-paren': ['error', {

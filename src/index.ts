@@ -7,49 +7,64 @@ import { SPANISH_BLUE, WHITE } from './core/Colors'
 import { TimerChallenge } from './puzzles/TimerChallenge'
 import { ButtonChallenge } from './puzzles/ButtonChallenge'
 
-
-const { Engine, Scene, MeshBuilder, HemisphericLight, UniversalCamera, Vector3, PointerEventTypes } = BABYLON
+const {
+    Engine,
+    Scene,
+    MeshBuilder,
+    HemisphericLight,
+    UniversalCamera,
+    Vector3,
+    PointerEventTypes,
+} = BABYLON
 const init = async () => {
     let inXRMode = false
     document.getElementById('intro')!.style.display = 'none'
     const canvasElement = document.getElementById('c')
-    const canvas: HTMLCanvasElement|null = canvasElement as unknown as HTMLCanvasElement
+    const canvas: HTMLCanvasElement | null =
+        canvasElement as unknown as HTMLCanvasElement
     if (!canvas) return
     canvas.style.display = 'block'
-    canvas.addEventListener("click", async () => {
+    canvas.addEventListener('click', async () => {
         if (document.pointerLockElement === canvasElement) return
         // @ts-expect-error: arguments are partially supported
         await canvas.requestPointerLock({
-            unadjustedMovement: true
+            unadjustedMovement: true,
         })
     })
     const engine = new Engine(canvas, true)
     const scene = new Scene(engine)
     const gl = new BABYLON.GlowLayer('glow', scene)
-    let activePuzzle: TimerChallenge|null = null
+    let activePuzzle: TimerChallenge | null = null
     const puzzles = []
-    const puzzleBoxes: BABYLON.TransformNode = new BABYLON.TransformNode('puzzleBoxes', scene)
+    const puzzleBoxes: BABYLON.TransformNode = new BABYLON.TransformNode(
+        'puzzleBoxes',
+        scene
+    )
     AnimationFactory.Instance.initScene(scene)
     scene.gravity = new Vector3(0, -0.15, 0)
     scene.collisionsEnabled = true
     // DEBUG
     if (debug) {
         scene.debugLayer.show({
-            embedMode: true
+            embedMode: true,
         })
     }
     engine.displayLoadingUI()
 
     // *** CAMERA ***
-    const camera = new UniversalCamera('MainCamera', new Vector3(0, 1.615, -5), scene)
+    const camera = new UniversalCamera(
+        'MainCamera',
+        new Vector3(0, 1.615, -5),
+        scene
+    )
     camera.inertia = 0
     camera.speed = 3
-    camera.keysUp.push(87)    		// W
-    camera.keysDown.push(83)   		// D
-    camera.keysLeft.push(65)  		// A
-    camera.keysRight.push(68) 		// S
-    camera.keysUpward.push(69)		// E
-    camera.keysDownward.push(81)     // Q
+    camera.keysUp.push(87) // W
+    camera.keysDown.push(83) // D
+    camera.keysLeft.push(65) // A
+    camera.keysRight.push(68) // S
+    camera.keysUpward.push(69) // E
+    camera.keysDownward.push(81) // Q
     camera.attachControl(canvas, true)
     // camera.speed = 0.1
     camera.angularSensibility = 500
@@ -59,14 +74,19 @@ const init = async () => {
     camera.minZ = 0.1
 
     const pointerPickCenterScreen = () => {
-        return scene.pick(engine.getRenderWidth() / 2, engine.getRenderHeight() / 2)
+        return scene.pick(
+            engine.getRenderWidth() / 2,
+            engine.getRenderHeight() / 2
+        )
     }
     // Custom pointerdown event for Mouse/keyboard
     scene.onPointerObservable.add((pointerInfo) => {
         if (pointerInfo.type !== PointerEventTypes.POINTERDOWN) return
         if (!scene) return
         if (!inXRMode && pointerInfo.event.button !== 0) return // Only left mouse click
-        const pickedInfo = (inXRMode) ? pointerInfo.pickInfo : pointerPickCenterScreen()
+        const pickedInfo = inXRMode
+            ? pointerInfo.pickInfo
+            : pointerPickCenterScreen()
         let pickedMesh = pickedInfo?.pickedMesh as InteractiveMesh
         while (pickedMesh && !pickedMesh.onPointerPick) {
             pickedMesh = pickedMesh.parent as InteractiveMesh
@@ -84,35 +104,38 @@ const init = async () => {
     window.addEventListener('resize', () => {
         engine.resize()
     })
-    
+
     // *** Inventory Parent
     const inventoryParent = new BABYLON.TransformNode('inventory-parent', scene)
     inventoryParent.setParent(scene.activeCamera)
-    inventoryParent.position = new Vector3(-.5, 0, 2)
+    inventoryParent.position = new Vector3(-0.5, 0, 2)
 
     // *** CAMERA CURSOR ***
-    const cursor = BABYLON.MeshBuilder.CreatePlane("cursor", {
-        
-    }, scene)
+    const cursor = BABYLON.MeshBuilder.CreatePlane('cursor', {}, scene)
+    gl.addExcludedMesh(cursor)
     cursor.isPickable = false
     cursor.material = CursorMaterial(scene)
     cursor.setParent(camera)
-    cursor.position = new Vector3 (0, 0, 1.1)
+    cursor.position = new Vector3(0, 0, 1.1)
     cursor.renderingGroupId = 1
 
     // *** SUN ***
-    new HemisphericLight("light", new Vector3(-0.5, 1, 0), scene)
-    const light2 = new HemisphericLight("light", new Vector3(0.5, -1, 0), scene)
-    
+    new HemisphericLight('light', new Vector3(-0.5, 1, 0), scene)
+    const light2 = new HemisphericLight('light', new Vector3(0.5, -1, 0), scene)
+
     // *** SKYBOX
-    const skybox = BABYLON.MeshBuilder.CreateSphere('skybox', {
-        diameter: 200,
-        sideOrientation: BABYLON.Mesh.DOUBLESIDE
-    }, scene)
+    const skybox = BABYLON.MeshBuilder.CreateSphere(
+        'skybox',
+        {
+            diameter: 200,
+            sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+        },
+        scene
+    )
     const skyboxMaterial = TexturedMeshNME({
         color1: SPANISH_BLUE,
         color2: WHITE,
-        scale: 0.1
+        scale: 0.1,
     })
     skybox.material = skyboxMaterial
     skybox.infiniteDistance = true
@@ -120,22 +143,22 @@ const init = async () => {
     // skybox.light
 
     // *** GROUND ***
-    const ground = MeshBuilder.CreateTiledGround("ground", {
+    const ground = MeshBuilder.CreateTiledGround('ground', {
         xmin: -50,
         xmax: 100,
         zmin: -20,
         zmax: 80,
         subdivisions: {
             w: 20,
-            h: 10
-        }
+            h: 10,
+        },
     })
     ground.material = GrassMaterial(scene)
     ground.checkCollisions = true
     ground.position.y = -0.01
-    
+
     // *** PLACE PUZZLES HERE ***
-        
+
     // // Red Room
     // const glob = new GlobPortal(scene)
     // glob.position = Vector3.Zero()
@@ -149,8 +172,12 @@ const init = async () => {
     const buttonChallenge = new ButtonChallenge(scene)
     buttonChallenge.model.setEnabled(false)
     puzzles.push(buttonChallenge)
-    
-    const timerBox = BABYLON.MeshBuilder.CreateBox('timerChallengeBox', {size: 0.3}, scene) as InteractiveMesh
+
+    const timerBox = BABYLON.MeshBuilder.CreateBox(
+        'timerChallengeBox',
+        { size: 0.3 },
+        scene
+    ) as InteractiveMesh
     timerBox.position = new Vector3(0, 2, 0)
     timerBox.onPointerPick = () => {
         activePuzzle = timerChallenge
@@ -160,7 +187,11 @@ const init = async () => {
     }
     timerBox.setParent(puzzleBoxes)
 
-    const buttonBox = BABYLON.MeshBuilder.CreateBox('buttonChallengeBox', {size: 0.3}, scene) as InteractiveMesh
+    const buttonBox = BABYLON.MeshBuilder.CreateBox(
+        'buttonChallengeBox',
+        { size: 0.3 },
+        scene
+    ) as InteractiveMesh
     buttonBox.position = new Vector3(-1, 2, 0)
     buttonBox.onPointerPick = () => {
         activePuzzle = buttonChallenge
@@ -169,7 +200,6 @@ const init = async () => {
         puzzleBoxes.setEnabled(false)
     }
     buttonBox.setParent(puzzleBoxes)
-
 
     scene.registerBeforeRender(() => {
         if (!activePuzzle) return
@@ -185,12 +215,16 @@ const init = async () => {
     })
 
     // *** BOUNDING BOX ***
-    const bounds = MeshBuilder.CreateBox('bounds', {
-        width: 58,
-        height: 5,
-        depth: 32,
-        sideOrientation: BABYLON.Mesh.BACKSIDE
-    }, scene)
+    const bounds = MeshBuilder.CreateBox(
+        'bounds',
+        {
+            width: 58,
+            height: 5,
+            depth: 32,
+            sideOrientation: BABYLON.Mesh.BACKSIDE,
+        },
+        scene
+    )
     bounds.position = new Vector3(4, 0, 28)
     bounds.checkCollisions = true
     bounds.visibility = 0
@@ -200,7 +234,7 @@ const init = async () => {
 
     // WebXR
     const xr = await scene.createDefaultXRExperienceAsync({
-        floorMeshes: [ground] // TODO: Add Floors from puzzles
+        floorMeshes: [ground], // TODO: Add Floors from puzzles
     })
     xr.input.onControllerAddedObservable.add((controller) => {
         controller.onMotionControllerInitObservable.add((motionController) => {
@@ -213,7 +247,7 @@ const init = async () => {
     })
     xr.input.onControllerRemovedObservable.add((xrInput, state) => {
         inventoryParent.setParent(scene.activeCamera)
-        inventoryParent.position = new Vector3(-.5, 0, 2)
+        inventoryParent.position = new Vector3(-0.5, 0, 2)
         inventoryParent.rotation = Vector3.Zero()
     })
     // xr.input.controllers.forEach((controller) => {
@@ -223,10 +257,9 @@ const init = async () => {
         cursor.isEnabled(!inXRMode)
         if (!inXRMode) {
             inventoryParent.setParent(scene.activeCamera)
-            inventoryParent.position = new Vector3(-.5, 0, 2)
-            inventoryParent.rotation = Vector3.Zero()  
-        } 
-        
+            inventoryParent.position = new Vector3(-0.5, 0, 2)
+            inventoryParent.rotation = Vector3.Zero()
+        }
     })
 }
 
