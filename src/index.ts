@@ -6,6 +6,7 @@ import { TexturedMeshNME } from './shaders/TexturedMeshNME'
 import { SPANISH_BLUE, WHITE } from './core/Colors'
 import { TimerChallenge } from './puzzles/TimerChallenge'
 import { ButtonChallenge } from './puzzles/ButtonChallenge'
+import { SnakeChallenge } from './puzzles/SnakeChallenge'
 
 const {
     Engine,
@@ -173,6 +174,10 @@ const init = async () => {
     buttonChallenge.model.setEnabled(false)
     puzzles.push(buttonChallenge)
 
+    const snakeChallenge = new SnakeChallenge(scene)
+    snakeChallenge.model.setEnabled(false)
+    puzzles.push(snakeChallenge)
+
     const timerBox = BABYLON.MeshBuilder.CreateBox(
         'timerChallengeBox',
         { size: 0.3 },
@@ -186,6 +191,20 @@ const init = async () => {
         puzzleBoxes.setEnabled(false)
     }
     timerBox.setParent(puzzleBoxes)
+
+    const snakeBox = BABYLON.MeshBuilder.CreateBox(
+        'snakeChallengeBox',
+        { size: 0.3 },
+        scene
+    ) as InteractiveMesh
+    snakeBox.position = new Vector3(1, 2, 0)
+    snakeBox.onPointerPick = () => {
+        activePuzzle = snakeChallenge
+        snakeChallenge.model.setEnabled(true)
+        snakeChallenge.reset()
+        puzzleBoxes.setEnabled(false)
+    }
+    snakeBox.setParent(puzzleBoxes)
 
     const buttonBox = BABYLON.MeshBuilder.CreateBox(
         'buttonChallengeBox',

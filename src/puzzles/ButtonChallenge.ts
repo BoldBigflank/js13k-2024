@@ -3,8 +3,8 @@ import { shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
 const { TransformNode, Vector3, MeshBuilder } = BABYLON
 
-const BOX_HEIGHT = 12
-const BOX_SIZE = 6
+const BOX_HEIGHT = 6
+const BOX_SIZE = 12
 
 const RESET_BUTTONS = 5
 const CORRECT_BUTTONS = 13
@@ -189,7 +189,7 @@ export class ButtonChallenge {
         mat2.albedoColor = color
         mat2.metallic = 0
         mat2.roughness = 1
-        const box2 = MeshBuilder.CreateBox(`button_challenge_box`, {
+        const box2 = MeshBuilder.CreateBox(`button_challenge_walls`, {
             height: BOX_HEIGHT,
             width: BOX_SIZE,
             depth: BOX_SIZE,
