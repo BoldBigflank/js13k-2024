@@ -47,7 +47,7 @@ class SnakePuzzle {
     running: boolean
     solved: boolean
     constructor() {
-        this.width = 10
+        this.width = 15
         this.height = 10
         this.tickRate = 500
         this.food = []
@@ -156,8 +156,8 @@ export class SnakeChallenge {
         this.parent = new TransformNode('SnakeChallenge', this.scene)
         this.boardParent = new TransformNode('Board', this.scene)
         this.boardParent.setParent(this.parent)
-        this.boardParent.position = new Vector3(-1.5, 3, 3)
-        this.boardParent.scaling = new Vector3(0.1, 0.1, 0.1)
+        this.boardParent.position = new Vector3(-0.5, 1, 3)
+        this.boardParent.scaling = new Vector3(0.5, 0.5, 0.5)
         this.state = 'intro'
         this.elapsedMs = 0
         this.currentFrame = 0
@@ -219,18 +219,39 @@ export class SnakeChallenge {
         mat2.albedoColor = color
         mat2.metallic = 0
         mat2.roughness = 1
-        const box2 = MeshBuilder.CreateBox(`snake_challenge_walls`, {
-            height: BOX_HEIGHT,
-            width: BOX_SIZE,
-            depth: BOX_SIZE,
-            sideOrientation: 1,
-        })
+        const box2 = MeshBuilder.CreateBox(
+            `snake_challenge_walls`,
+            {
+                height: BOX_HEIGHT,
+                width: BOX_SIZE,
+                depth: BOX_SIZE,
+                sideOrientation: 1,
+            },
+            this.scene
+        )
         box2.checkCollisions = true
         box2.isPickable = false
         box2.setParent(this.parent)
         box2.position.y = 0.5 * BOX_HEIGHT + 0.01
         box2.material = mat2
         box2.receiveShadows = true
+
+        // Control plane
+        const plane = MeshBuilder.CreatePlane(
+            'control',
+            {
+                width: BOX_SIZE,
+                height: BOX_HEIGHT,
+            },
+            this.scene
+        )
+        // plane.setParent(this.boardParent)
+        plane.position = new Vector3(
+            0,
+            BOX_HEIGHT * 0.5,
+            this.boardParent.position.z
+        )
+        plane.isPickable = true
 
         // Make an instructional sign
         const infoBillboard = MeshBuilder.CreatePlane(
@@ -250,6 +271,22 @@ export class SnakeChallenge {
             this.start()
         }
         this.infoBillboard = infoBillboard
+
+        // Board dots
+        for (let y = 0; y < this.puzzle.height; y++) {
+            for (let x = 0; x < this.puzzle.width; x++) {
+                const dot = MeshBuilder.CreateCylinder(
+                    `board_dot_${x}-${y}`,
+                    { height: 0.2, diameter: 0.2 },
+                    this.scene
+                )
+                dot.setParent(this.boardParent)
+                dot.scaling = Vector3.One()
+                dot.position = new Vector3(x, y, 0)
+                dot.rotation = new Vector3(Math.PI / 2, 0, 0)
+            }
+        }
+        this.updateMeshes()
     }
 
     updateMeshes() {
@@ -294,6 +331,7 @@ export class SnakeChallenge {
         })
         // Empty spaces
         this.boardParent.getChildMeshes(true).forEach((c) => {
+            if (!c.metadata) return
             if (c.metadata.frame !== this.currentFrame) c.dispose()
         })
     }

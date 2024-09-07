@@ -82,12 +82,16 @@ export class TimerChallenge {
         mat2.albedoColor = color
         mat2.metallic = 0
         mat2.roughness = 1
-        const box2 = MeshBuilder.CreateBox(`timer_challenge_walls`, {
-            height: BOX_HEIGHT,
-            width: BOX_SIZE,
-            depth: BOX_SIZE,
-            sideOrientation: 1,
-        })
+        const box2 = MeshBuilder.CreateBox(
+            `timer_challenge_walls`,
+            {
+                height: BOX_HEIGHT,
+                width: BOX_SIZE,
+                depth: BOX_SIZE,
+                sideOrientation: 1,
+            },
+            this.scene
+        )
         box2.checkCollisions = true
         box2.isPickable = false
         box2.setParent(this.parent)

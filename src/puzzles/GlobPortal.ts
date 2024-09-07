@@ -49,10 +49,14 @@ export class GlobPortal {
         // Create the inner portal
         // Create the walls
         const color = BABYLON.Color3.Random()
-        const box2 = BABYLON.MeshBuilder.CreateBox(`box_2${ref}`, {
-            size: boxSize,
-            sideOrientation: 1,
-        })
+        const box2 = BABYLON.MeshBuilder.CreateBox(
+            `box_2${ref}`,
+            {
+                size: boxSize,
+                sideOrientation: 1,
+            },
+            this.scene
+        )
         box2.isPickable = false
         box2.setParent(this.parent)
         box2.position.y = 0.5 * boxSize + 0.01
