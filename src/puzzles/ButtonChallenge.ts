@@ -189,7 +189,7 @@ export class ButtonChallenge {
         mat2.albedoColor = color
         mat2.metallic = 0
         mat2.roughness = 1
-        const 23MeshBuilder.CreateBox(
+        const box2 = MeshBuilder.CreateBox(
             `button_challenge_walls`,
             {
                 height: BOX_HEIGHT,

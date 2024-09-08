@@ -46,6 +46,7 @@ class SnakePuzzle {
     snakes: Snake[]
     running: boolean
     solved: boolean
+    target?: BABYLON.Nullable<BABYLON.Vector2>
     constructor() {
         this.width = 15
         this.height = 10
@@ -59,6 +60,7 @@ class SnakePuzzle {
                 )
             ),
         ]
+        this.target = null
         this.running = true
         this.solved = false
     }
@@ -95,6 +97,22 @@ class SnakePuzzle {
     tick() {
         this.snakes.forEach((snake) => {
             if (!snake.alive) return
+            // Update the move direction
+            if (this.target) {
+                const head = snake.body[0]
+                // head.position
+                const distX = this.target.x - head.x
+                const distY = this.target.y - head.y
+                let desiredDirection = snake.direction
+                if (Math.abs(distY) > Math.abs(distX)) {
+                    desiredDirection = distY < 0 ? 'down' : 'up'
+                } else {
+                    desiredDirection = distX < 0 ? 'left' : 'right'
+                }
+                if (!this.spaceHasSnakes(moveDirection(head, desiredDirection)))
+                    snake.direction = desiredDirection
+            }
+
             const desiredSpot = moveDirection(snake.body[0], snake.direction)
             // Check for walls
             if (
@@ -156,7 +174,7 @@ export class SnakeChallenge {
         this.parent = new TransformNode('SnakeChallenge', this.scene)
         this.boardParent = new TransformNode('Board', this.scene)
         this.boardParent.setParent(this.parent)
-        this.boardParent.position = new Vector3(-0.5, 1, 3)
+        this.boardParent.position = new Vector3(-3.5, 1, 3)
         this.boardParent.scaling = new Vector3(0.5, 0.5, 0.5)
         this.state = 'intro'
         this.elapsedMs = 0
@@ -196,7 +214,6 @@ export class SnakeChallenge {
         if (this.state !== 'running') return
         this.elapsedMs += 1
         if (this.elapsedMs >= TICK_RATE) {
-            console.log('tick', this.state)
             if (this.puzzle) this.puzzle.tick()
             this.updateMeshes()
             this.elapsedMs = 0
@@ -204,7 +221,6 @@ export class SnakeChallenge {
         }
     }
     reset() {
-        console.log('reset')
         this.scene.unregisterBeforeRender(this.clock)
         this.scene.registerBeforeRender(this.clock)
         // Remove the lights, buttons, walls
@@ -244,7 +260,7 @@ export class SnakeChallenge {
                 height: BOX_HEIGHT,
             },
             this.scene
-        )
+        ) as InteractiveMesh
         // plane.setParent(this.boardParent)
         plane.position = new Vector3(
             0,
@@ -252,6 +268,25 @@ export class SnakeChallenge {
             this.boardParent.position.z
         )
         plane.isPickable = true
+        const buddy = MeshBuilder.CreateSphere(
+            'buddy',
+            {
+                diameter: 0.5,
+            },
+            this.scene
+        )
+        buddy.isPickable = false
+        plane.onPointerMove = (pickingInfo) => {
+            if (!pickingInfo?.pickedPoint) return
+
+            buddy.position = pickingInfo?.pickedPoint
+            // Convert to board space
+            const boardPosition = new Vector2(
+                buddy.position.x - this.boardParent.position.x,
+                buddy.position.y - this.boardParent.position.y
+            ).scaleInPlace(1 / this.boardParent.scaling.x)
+            this.puzzle.target = boardPosition
+        }
 
         // Make an instructional sign
         const infoBillboard = MeshBuilder.CreatePlane(
@@ -280,6 +315,7 @@ export class SnakeChallenge {
                     { height: 0.2, diameter: 0.2 },
                     this.scene
                 )
+                dot.isPickable = false
                 dot.setParent(this.boardParent)
                 dot.scaling = Vector3.One()
                 dot.position = new Vector3(x, y, 0)
@@ -303,6 +339,7 @@ export class SnakeChallenge {
                         { size: 0.95 },
                         this.scene
                     )
+                    snakeBodyMesh.isPickable = false
                     snakeBodyMesh.setParent(this.boardParent)
                     snakeBodyMesh.scaling = Vector3.One()
                     snakeBodyMesh.position = new Vector3(pos.x, pos.y, 0)
@@ -323,6 +360,7 @@ export class SnakeChallenge {
                     { diameter: 1 },
                     this.scene
                 )
+                foodMesh.isPickable = false
                 foodMesh.setParent(this.boardParent)
                 foodMesh.scaling = Vector3.One()
                 foodMesh.position = new Vector3(pos.x, pos.y, 0)

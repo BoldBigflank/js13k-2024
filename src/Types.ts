@@ -1,4 +1,3 @@
-
 export interface Jar {
     orientation: number
     mesh: InteractiveMesh
@@ -11,7 +10,8 @@ export interface Tile {
 }
 
 export interface InteractiveMesh extends BABYLON.Mesh {
-    onPointerPick?: () => void
+    onPointerPick?: (info: BABYLON.Nullable<BABYLON.PickingInfo>) => void
+    onPointerMove?: (info: BABYLON.Nullable<BABYLON.PickingInfo>) => void
 }
 
 export interface MeshOpts {
@@ -33,7 +33,7 @@ export type AnimationTransform = {
 }
 
 export interface AnimateTransformOpts {
-    mesh: BABYLON.Mesh|BABYLON.TransformNode
+    mesh: BABYLON.Mesh | BABYLON.TransformNode
     end: AnimationTransform
     ease?: BABYLON.EasingFunction
     duration: number

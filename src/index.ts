@@ -82,18 +82,30 @@ const init = async () => {
     }
     // Custom pointerdown event for Mouse/keyboard
     scene.onPointerObservable.add((pointerInfo) => {
-        if (pointerInfo.type !== PointerEventTypes.POINTERDOWN) return
         if (!scene) return
-        if (!inXRMode && pointerInfo.event.button !== 0) return // Only left mouse click
-        const pickedInfo = inXRMode
-            ? pointerInfo.pickInfo
-            : pointerPickCenterScreen()
-        let pickedMesh = pickedInfo?.pickedMesh as InteractiveMesh
-        while (pickedMesh && !pickedMesh.onPointerPick) {
-            pickedMesh = pickedMesh.parent as InteractiveMesh
-        }
-        if (pickedMesh && pickedMesh.onPointerPick) {
-            pickedMesh.onPointerPick()
+        if (pointerInfo.type === PointerEventTypes.POINTERMOVE) {
+            const pickedInfo = inXRMode
+                ? pointerInfo.pickInfo
+                : pointerPickCenterScreen()
+            let pickedMesh = pickedInfo?.pickedMesh as InteractiveMesh
+            while (pickedMesh && !pickedMesh.onPointerMove) {
+                pickedMesh = pickedMesh.parent as InteractiveMesh
+            }
+            if (pickedMesh && pickedMesh.onPointerMove) {
+                pickedMesh.onPointerMove(pickedInfo)
+            }
+        } else if (pointerInfo.type === PointerEventTypes.POINTERDOWN) {
+            if (!inXRMode && pointerInfo.event.button !== 0) return // Only left mouse click
+            const pickedInfo = inXRMode
+                ? pointerInfo.pickInfo
+                : pointerPickCenterScreen()
+            let pickedMesh = pickedInfo?.pickedMesh as InteractiveMesh
+            while (pickedMesh && !pickedMesh.onPointerPick) {
+                pickedMesh = pickedMesh.parent as InteractiveMesh
+            }
+            if (pickedMesh && pickedMesh.onPointerPick) {
+                pickedMesh.onPointerPick(pickedInfo)
+            }
         }
     })
     // run the render loop
