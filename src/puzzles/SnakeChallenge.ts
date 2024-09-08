@@ -46,9 +46,10 @@ class SnakePuzzle {
     snakes: Snake[]
     running: boolean
     solved: boolean
+    failed: boolean
     target?: BABYLON.Nullable<BABYLON.Vector2>
     constructor() {
-        this.width = 15
+        this.width = 10
         this.height = 10
         this.tickRate = 500
         this.food = []
@@ -63,6 +64,7 @@ class SnakePuzzle {
         this.target = null
         this.running = true
         this.solved = false
+        this.failed = false
     }
 
     get score() {
@@ -125,6 +127,7 @@ class SnakePuzzle {
             ) {
                 // Fail state
                 snake.alive = false
+                this.failed = true
             }
 
             // Remove the tail
@@ -211,6 +214,10 @@ export class SnakeChallenge {
     isFailed() {
         if (this.state !== 'running') return false
         if (this.failed) return true
+        if (this.puzzle.failed) {
+            // Animations, sfx
+            this.failed = true
+        }
 
         return this.failed
     }
@@ -226,8 +233,10 @@ export class SnakeChallenge {
         }
     }
     reset() {
+        this.puzzle = new SnakePuzzle()
         this.scene.unregisterBeforeRender(this.clock)
         this.scene.registerBeforeRender(this.clock)
+
         // Remove the lights, buttons, walls
         // this.boardParent.dispose()
         this.state = 'intro'
@@ -266,7 +275,7 @@ export class SnakeChallenge {
             },
             this.scene
         ) as InteractiveMesh
-        // plane.setParent(this.boardParent)
+        plane.setParent(this.parent)
         plane.position = new Vector3(
             0,
             BOX_HEIGHT * 0.5,
@@ -280,6 +289,7 @@ export class SnakeChallenge {
             },
             this.scene
         )
+        buddy.setParent(this.parent)
         buddy.isPickable = false
         plane.onPointerMove = (pickingInfo) => {
             if (!pickingInfo?.pickedPoint) return
