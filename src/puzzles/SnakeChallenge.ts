@@ -64,6 +64,10 @@ class SnakePuzzle {
         this.running = true
         this.solved = false
     }
+
+    get score() {
+        return this.snakes[0].body.length
+    }
     setSnakeDirection(index: number, direction: Direction) {
         this.snakes[index].direction = direction
     }
@@ -161,6 +165,7 @@ export class SnakeChallenge {
     parent: BABYLON.TransformNode
     boardParent: BABYLON.TransformNode
     infoBillboard?: BABYLON.Mesh
+    scoreboard?: BABYLON.Mesh
 
     puzzle: SnakePuzzle
     elapsedMs: number
@@ -367,11 +372,36 @@ export class SnakeChallenge {
             }
             foodMesh.metadata = { frame: this.currentFrame }
         })
-        // Empty spaces
+        // Unused spaces
         this.boardParent.getChildMeshes(true).forEach((c) => {
             if (!c.metadata) return
             if (c.metadata.frame !== this.currentFrame) c.dispose()
         })
+        // Scoreboard
+        if (!this.scoreboard) {
+            // Scoreboard
+            const scoreboard = MeshBuilder.CreatePlane(
+                'scoreboard',
+                {
+                    width: 1,
+                    height: 1,
+                    sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                },
+                this.scene
+            )
+            scoreboard.setParent(this.parent)
+            scoreboard.isPickable = false
+            scoreboard.position = new Vector3(
+                0,
+                0.5,
+                this.boardParent.position.z - 0.5
+            )
+            this.scoreboard = scoreboard
+        }
+        this.scoreboard.material = TextMaterial(
+            [`${this.puzzle.score}`],
+            this.scene
+        )
     }
 
     start() {
