@@ -1,4 +1,4 @@
-import { BLUE, GREEN, ORANGE, RED } from '@/core/Colors'
+import { GREEN, ORANGE } from '@/core/Colors'
 import { TextMaterial } from '@/core/textures'
 import { debug, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
