@@ -1,38 +1,47 @@
 # TODO
 
-Make a Magic Box puzzle
-Make an opening area and a statue to complete
+Timers
 
--   Snake - 13 box pattern
--   Buttons - Number 13
--   Magic Box - 9 cube base
--   Timers - Box particles
+-   Big ol Start button
+-   Display lives
+-   Stop Animation
 
-3/4 Puzzles
+Buttons
 
--   Clock Stoppers - Stop each clock at 13s; failing kicks you out
--   Snake Ball - Move the ball to the target
-    Each puzzle is in a different area
-    No teleportation/movement, each puzzle is contained
-    Make them orbs?
+-   Fix button materials swapping
+    -   Use a `glow_` mesh name prefix with custom rules
+-   Push the Button Animation
+-   Reset button animation
+
+Snake
+
+-   Change ticks to time based
+-   Animate Snake body?
+    -   Change body segment name to index
+-   Make the body segments smaller than the head
+
+Magic Box
+
+-   Show the sum of each column/row
+-   Animate Position changing
+
+Lobby
+
+-   Make an opening area and a statue to complete
+    -   Snake - 13 box pattern
+    -   Buttons - Number 13
+    -   Magic Box - 9 cube base
+    -   Timers - Box particles
+
+General
+
+-   Make info Billboards stick around
+-   Make a failure animation/sfx
+-   Make a success animation/sfx
+-   Reset properly, and disable completed rooms
+
+Victory Area
 
 ## Make the Game
 
--   Get to MVP ASAP
-
-Main room - Choose a Puzzle
-
--   Story - Game Master trapped you
-
-Puzzle 1 - Skill - Clock Stopper
-
--   Stop the clock at 13
-    Puzzle 3 - Mystery - Lights Off
--   Press buttons to turn off lights to reveal a 13, avoid reset buttons
-    Puzzle 4 - Physical - Snake
--   Follow the pointer; Grow to a size of 13
--   Could do an agar.io style snake
-    Puzzle 2 - Mental - Magic Square
--   Switch numbers around to add up to 13 on all rows/columns/diag
-
-Victory Area
+### Story - Game Master trapped you
