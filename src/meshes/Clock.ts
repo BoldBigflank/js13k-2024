@@ -12,11 +12,13 @@ export type ClockOpts = {
     target?: number
 }
 
+let observable: () => void
+
 export class Clock {
     scene: BABYLON.Scene
     parent: InteractiveMesh
-    startDt: number
     endDt: number
+    count: number
     target: number
     value: number
     tickSFX?: BABYLON.Sound
@@ -27,8 +29,8 @@ export class Clock {
 
     constructor(opts: ClockOpts, scene: BABYLON.Scene) {
         this.scene = scene
-        this.startDt = Date.now()
-        this.endDt = this.startDt + (opts.count ? opts.count : 30) * 1000
+        this.count = (opts.count || 30) * 1000
+        this.endDt = -1
         this.parent = new TransformNode('Clock', this.scene) as InteractiveMesh
         this.value = 0
         this.state = 'intro'
@@ -93,8 +95,7 @@ export class Clock {
         face.isPickable = false
         face.position = new Vector3(0, 0, -0.126)
         this.face = face
-
-        this.scene.registerBeforeRender(() => {
+        observable = () => {
             if (this.state === 'running') {
                 const newValue = Math.max(
                     0,
@@ -114,19 +115,21 @@ export class Clock {
                         this.scene
                     )
             }
-        })
+        }
+        this.scene.registerBeforeRender(observable)
 
         return parent
     }
 
     start() {
-        console.log('clock starting')
         this.state = 'running'
+        this.endDt = Date.now() + this.count
         if (this.body) this.body.material = this.materials.blue
     }
 
     stop() {
         this.value === this.target ? this.pass() : this.fail()
+        this.scene.unregisterBeforeRender(observable)
     }
 
     pass() {
@@ -137,5 +140,11 @@ export class Clock {
     fail() {
         this.state = 'failed'
         if (this.body) this.body.material = this.materials.red
+    }
+
+    dispose() {
+        this.scene.unregisterBeforeRender(observable)
+        this.face?.dispose()
+        this.body?.dispose()
     }
 }

@@ -3,7 +3,7 @@ import { CursorMaterial, ColorTextureMaterial } from './core/textures'
 import { AnimationFactory } from './core/Animation'
 import { debug } from './core/Utils'
 import { TexturedMeshNME } from './shaders/TexturedMeshNME'
-import { GREEN, SPANISH_BLUE, WHITE } from './core/Colors'
+import { LIGHT_GREEN, SPANISH_BLUE, WHITE } from './core/Colors'
 import { TimerChallenge } from './puzzles/TimerChallenge'
 import { ButtonChallenge } from './puzzles/ButtonChallenge'
 import { SnakeChallenge } from './puzzles/SnakeChallenge'
@@ -40,9 +40,12 @@ const init = async () => {
     const engine = new Engine(canvas, true)
     const scene = new Scene(engine)
     const gl = new BABYLON.GlowLayer('glow', scene)
+    // gl.intensity = 0.5
     gl.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
         if (mesh.name.includes('glow_')) {
             result.set(1, 1, 1, 1)
+        } else if (material.name.includes('glow')) {
+            result.set(0.5, 0.5, 0.5, 1)
         } else {
             result.set(0, 0, 0, 0)
         }
@@ -184,7 +187,7 @@ const init = async () => {
             h: 10,
         },
     })
-    ground.material = ColorTextureMaterial(GREEN, scene)
+    ground.material = ColorTextureMaterial(LIGHT_GREEN, scene)
     ground.checkCollisions = true
     ground.position.y = -0.01
 

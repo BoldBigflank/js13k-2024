@@ -1,24 +1,18 @@
 # TODO
 
+## Bugs
+
 Timers
 
--   Big ol Start button
 -   Display lives
--   Stop Animation
+-   Stop Animation/Particles
 
 Buttons
 
--   Fix button materials swapping
-    -   Use a `glow_` mesh name prefix with custom rules
--   Push the Button Animation
+-   Good/Bad SFX
 -   Reset button animation
 
 Snake
-
--   Change ticks to time based
--   Animate Snake body?
-    -   Change body segment name to index
--   Make the body segments smaller than the head
 
 Magic Box
 
@@ -36,10 +30,23 @@ Lobby
 General
 
 -   Make info Billboards stick around
--   Make a failure animation/sfx
--   Make a success animation/sfx
+-   Make a failure animation
+-   Make a success animation
 -   Reset properly, and disable completed rooms
 -   zzfx don't autoplay
+-   localstorage to save progress
+
+## SFX
+
+-   Buttons - Good/Reset SFX
+-   Timers - Good/Bad SFX
+-   Snake - Eat
+-   Snake - Move?
+-   Magic Box - Select
+-   Lobby - Choose Puzzle
+-   InfoPanel Play/Home
+-   General - Success
+-   General - Fail
 
 Victory Area
 

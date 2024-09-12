@@ -1,12 +1,14 @@
-import { ORANGE } from '@/core/Colors'
+import { AnimationFactory } from '@/core/Animation'
+import { BLACK, DARK_GREEN, ORANGE, RED } from '@/core/Colors'
 import { ColorMaterial, TextMaterial } from '@/core/textures'
 import { debug } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
+import { Color3 } from 'babylonjs'
 const { TransformNode, Vector2, Vector3, MeshBuilder } = BABYLON
 
 const BOX_HEIGHT = 6
 const BOX_SIZE = 12
-const TICK_RATE = 30
+const TICK_RATE = 400
 
 const infoText = ['Eat apples to grow', 'to size 13.', "Don't get stuck."]
 
@@ -21,7 +23,7 @@ class Snake {
         this.body = [start, start]
         this.direction = 'up'
         this.alive = true
-        this.color = BABYLON.Color3.Random().toHexString()
+        this.color = DARK_GREEN
     }
 }
 const Up = new Vector2(0, 1)
@@ -43,7 +45,6 @@ const moveDirection = (
 class SnakePuzzle {
     width: number
     height: number
-    tickRate: number
     food: BABYLON.Vector2[]
     snakes: Snake[]
     running: boolean
@@ -53,7 +54,6 @@ class SnakePuzzle {
     constructor() {
         this.width = 10
         this.height = 10
-        this.tickRate = 500
         this.food = []
         this.snakes = [
             new Snake(
@@ -182,13 +182,11 @@ export class SnakeChallenge {
         this.scene = scene
         this.puzzle = new SnakePuzzle()
         this.parent = new TransformNode('SnakeChallenge', this.scene)
-        this.boardParent = new TransformNode('Board', this.scene)
-        this.boardParent.setParent(this.parent)
-        this.boardParent.position = new Vector3(-3.5, 1, 3)
-        this.boardParent.scaling = new Vector3(0.5, 0.5, 0.5)
+        this.boardParent = new TransformNode('BoardParent', this.scene)
         this.state = 'intro'
         this.elapsedMs = 0
         this.currentFrame = 0
+        if (debug) console.log('SnakeChallenge created')
     }
 
     get model() {
@@ -204,7 +202,6 @@ export class SnakeChallenge {
     }
 
     isSolved() {
-        if (debug) return true
         if (this.state !== 'running') return false
         if (this.solved) return true
         if (this.puzzle.isSolved()) {
@@ -218,6 +215,7 @@ export class SnakeChallenge {
         if (this.state !== 'running') return false
         if (this.failed) return true
         if (this.puzzle.failed) {
+            console.log('FAILED')
             // Animations, sfx
             this.failed = true
         }
@@ -227,7 +225,7 @@ export class SnakeChallenge {
 
     clock = () => {
         if (this.state !== 'running') return
-        this.elapsedMs += 1
+        this.elapsedMs += this.scene.getEngine().getDeltaTime()
         if (this.elapsedMs >= TICK_RATE) {
             if (this.puzzle) this.puzzle.tick()
             this.updateMeshes()
@@ -236,6 +234,12 @@ export class SnakeChallenge {
         }
     }
     reset() {
+        this.parent.getChildMeshes().forEach((c) => c.dispose())
+        this.boardParent = new TransformNode('Board', this.scene)
+        this.boardParent.setParent(this.parent)
+        this.boardParent.position = new Vector3(-3.5, 1, 3)
+        this.boardParent.scaling = new Vector3(0.5, 0.5, 0.5)
+
         this.puzzle = new SnakePuzzle()
         this.scene.unregisterBeforeRender(this.clock)
         this.scene.registerBeforeRender(this.clock)
@@ -289,12 +293,13 @@ export class SnakeChallenge {
         const buddy = MeshBuilder.CreateSphere(
             'buddy',
             {
-                diameter: 0.5,
+                diameter: 0.1,
             },
             this.scene
         )
         buddy.setParent(this.parent)
         buddy.isPickable = false
+        buddy.material = ColorMaterial(RED, { glow: true }, this.scene)
         plane.onPointerMove = (pickingInfo) => {
             if (!pickingInfo?.pickedPoint) return
 
@@ -334,6 +339,7 @@ export class SnakeChallenge {
                     { height: 0.2, diameter: 0.2 },
                     this.scene
                 )
+                dot.material = ColorMaterial(BLACK, {}, this.scene)
                 dot.isPickable = false
                 dot.setParent(this.boardParent)
                 dot.scaling = Vector3.One()
@@ -349,20 +355,27 @@ export class SnakeChallenge {
         const { snakes, food } = this.puzzle
         snakes.forEach((snake, snakeIndex) => {
             snake.body.forEach((pos, snakeBodyIndex) => {
-                let snakeBodyMesh = this.scene.getMeshByName(
-                    `snake_${snakeIndex}_${pos.x}-${pos.y}`
-                )
+                const snakeBodyName = `snake_${snakeIndex}_${snakeBodyIndex}`
+                let snakeBodyMesh = this.scene.getMeshByName(snakeBodyName)
                 if (!snakeBodyMesh) {
                     snakeBodyMesh = MeshBuilder.CreateBox(
-                        `snake_${snakeIndex}_${pos.x}-${pos.y}`,
-                        { size: 0.95 },
+                        snakeBodyName,
+                        { size: snakeBodyIndex ? 0.8 : 0.95 },
                         this.scene
                     )
                     snakeBodyMesh.isPickable = false
                     snakeBodyMesh.setParent(this.boardParent)
-                    snakeBodyMesh.scaling = Vector3.One()
                     snakeBodyMesh.position = new Vector3(pos.x, pos.y, 0)
+                    snakeBodyMesh.scaling = Vector3.One()
                 }
+                AnimationFactory.Instance.animateTransform({
+                    mesh: snakeBodyMesh,
+                    end: {
+                        position: new Vector3(pos.x, pos.y, 0),
+                    },
+                    duration: 70,
+                })
+                snakeBodyMesh.position = new Vector3(pos.x, pos.y, 0)
                 snakeBodyMesh.metadata = { frame: this.currentFrame }
                 snakeBodyMesh.material = ColorMaterial(
                     snake.color,
@@ -379,6 +392,13 @@ export class SnakeChallenge {
                     { diameter: 1 },
                     this.scene
                 )
+                const mat = ColorMaterial(
+                    RED,
+                    { glow: true },
+                    this.scene
+                ) as BABYLON.StandardMaterial
+                mat.emissiveColor = Color3.FromHexString(RED)
+                foodMesh.material = mat
                 foodMesh.isPickable = false
                 foodMesh.setParent(this.boardParent)
                 foodMesh.scaling = Vector3.One()

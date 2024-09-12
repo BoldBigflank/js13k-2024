@@ -1,8 +1,18 @@
-import { ORANGE } from '@/core/Colors'
-import { ColorMaterial, TextMaterial } from '@/core/textures'
-import { debug, shuffle } from '@/core/Utils'
+import { AnimationFactory } from '@/core/Animation'
+import {
+    BLACK,
+    BLUE,
+    BROWN,
+    GREEN,
+    LIGHT_GREEN,
+    MID_GREY,
+    ORANGE,
+    YELLOW,
+} from '@/core/Colors'
+import { TextMaterial } from '@/core/textures'
+import { debug, sample, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
-const { TransformNode, Vector3, MeshBuilder } = BABYLON
+const { TransformNode, Vector3, Color3, MeshBuilder } = BABYLON
 
 const BOX_HEIGHT = 6
 const BOX_SIZE = 12
@@ -142,7 +152,9 @@ export class ButtonChallenge {
             Math.PI * -0.15
         )
         this.buttonsParent.position = new Vector3(-0.5, 0.35, -2)
+
         this.state = 'intro'
+        if (debug) console.log('ButtonChallenge created')
     }
 
     get model() {
@@ -158,7 +170,7 @@ export class ButtonChallenge {
     }
 
     isSolved() {
-        if (debug) return true
+        // if (debug) return true
         if (this.state !== 'running') return false
         if (this.solved) return true
         if (this.puzzle.isSolved()) {
@@ -176,17 +188,16 @@ export class ButtonChallenge {
     }
 
     reset() {
-        // Remove the lights, buttons, walls
+        this.parent.setEnabled(true)
         // this.buttonsParent.dispose()
         // this.lightsParent.dispose()
+
         this.state = 'intro'
         this.solved = false
         this.failed = false
 
-        const { board, buttons } = this.puzzle
-
         // Make the walls
-        const color = BABYLON.Color3.Random()
+        const color = Color3.Random()
         const mat2 = new BABYLON.PBRMaterial('')
         mat2.albedoColor = color
         mat2.metallic = 0
@@ -208,53 +219,6 @@ export class ButtonChallenge {
         box2.material = mat2
         box2.receiveShadows = true
 
-        // Make the light meshes
-        for (let y = 0; y < board.length; y++) {
-            for (let x = 0; x < board[y].length; x++) {
-                // Prepare the mesh
-                const light = MeshBuilder.CreateSphere(
-                    `light_${x}-${y}`,
-                    { diameter: 0.3 },
-                    this.scene
-                )
-                light.material = ColorMaterial(
-                    '#ffffff',
-                    { glow: board[y][x] === 1 },
-                    this.scene
-                )
-                light.setParent(this.lightsParent)
-                light.position = new Vector3(x * 0.3, y * -0.3, 1)
-            }
-        }
-
-        // Make button meshes
-        for (let i = 0; i < buttons.length; i++) {
-            const size = Math.floor(Math.random() * 3) * 0.075 + 0.2
-            const color = BABYLON.Color3.Random()
-            const mat2 = new BABYLON.PBRMaterial('')
-            mat2.albedoColor = color
-            mat2.metallic = 0
-            mat2.roughness = 1
-            // Shape
-            const button = MeshBuilder.CreateBox(
-                `button_${i}`,
-                { width: size, depth: size, height: 0.1 },
-                this.scene
-            ) as InteractiveMesh
-            button.material = mat2
-            button.setParent(this.buttonsParent)
-            button.position = new Vector3(
-                Math.floor(i / 4) * 0.35,
-                0.5,
-                (i % 4) * 0.25
-            )
-            button.onPointerPick = () => {
-                this.start()
-                this.puzzle.pressButton(i)
-                this.updateMeshes()
-            }
-        }
-
         // Make an instructional sign
         const infoBillboard = MeshBuilder.CreatePlane(
             'billboard',
@@ -273,6 +237,7 @@ export class ButtonChallenge {
             this.start()
         }
         this.infoBillboard = infoBillboard
+        this.updateMeshes()
     }
 
     updateMeshes() {
@@ -280,25 +245,94 @@ export class ButtonChallenge {
         const { board, buttons } = this.puzzle
         board.forEach((row, y) => {
             row.forEach((val, x) => {
-                const lightMesh = this.scene.getMeshByName(`light_${x}-${y}`)
-                if (!lightMesh) return
-                lightMesh.material = ColorMaterial(
-                    '#ffffff',
-                    { glow: val === 1 },
-                    this.scene
-                )
+                const lightMeshName = `light_${x}-${y}`
+                let lightMesh = this.scene.getMeshByName(lightMeshName)
+                if (!lightMesh) {
+                    const mat2 = new BABYLON.PBRMaterial(
+                        `light_${x}_${y}`,
+                        this.scene
+                    )
+                    mat2.metallic = 0
+                    mat2.roughness = 1
+
+                    // Prepare the mesh
+                    lightMesh = MeshBuilder.CreateSphere(
+                        lightMeshName,
+                        { diameter: 0.3 },
+                        this.scene
+                    )
+                    lightMesh.metadata = { color: '#ffffff' }
+                    lightMesh.material = mat2
+                    lightMesh.setParent(this.lightsParent)
+                    lightMesh.position = new Vector3(x * 0.3, y * -0.3, 1)
+                }
+                if (lightMesh.material) {
+                    const mat = lightMesh.material as BABYLON.PBRMaterial
+                    mat.name = `light${val ? '_glow' : ''}`
+                    mat.albedoColor = val
+                        ? lightMesh.metadata.color
+                        : Color3.Black()
+                    mat.emissiveColor = val
+                        ? lightMesh.metadata.color
+                        : Color3.Black()
+                }
             })
         })
         // Update buttons
         buttons.forEach((button, i) => {
-            const buttonMesh = this.scene.getMeshByName(`button_${i}`)
-            if (!buttonMesh) return
-            const mat = ColorMaterial(
-                '#ffffff',
-                { glow: button.on },
-                this.scene
-            )
-            buttonMesh.material = mat
+            const buttonName = `button_${i}`
+            let buttonMesh = this.scene.getMeshByName(
+                buttonName
+            ) as InteractiveMesh
+            if (!buttonMesh) {
+                const size = Math.floor(Math.random() * 3) * 0.075 + 0.2
+                const color = Color3.FromHexString(
+                    sample([LIGHT_GREEN, BLUE, YELLOW, MID_GREY, BROWN, BLACK])
+                )
+                const mat2 = new BABYLON.PBRMaterial(`button_${i}`)
+                mat2.metallic = 0
+                mat2.roughness = 1
+                // Shape
+                buttonMesh = MeshBuilder.CreateCylinder(
+                    buttonName,
+                    {
+                        diameter: size,
+                        height: 0.1,
+                        tessellation: Math.floor(Math.random() * 3) + 3,
+                    },
+                    this.scene
+                ) as InteractiveMesh
+                buttonMesh.metadata = { color: color }
+                buttonMesh.material = mat2
+                buttonMesh.setParent(this.buttonsParent)
+                buttonMesh.position = new Vector3(
+                    Math.floor(i / 4) * 0.35,
+                    0.5,
+                    (i % 4) * 0.25
+                )
+                buttonMesh.onPointerPick = () => {
+                    buttonMesh.scaling = new Vector3(1, 0.5, 1)
+                    AnimationFactory.Instance.animateTransform({
+                        mesh: buttonMesh,
+                        end: {
+                            scaling: new Vector3(1, 1, 1),
+                        },
+                        duration: 60,
+                    })
+                    this.start()
+                    this.puzzle.pressButton(i)
+                    this.updateMeshes()
+                }
+            }
+            if (buttonMesh.material) {
+                console.log('updating mat', i, button)
+                const mat = buttonMesh.material as BABYLON.PBRMaterial
+                // mat.name = `button_${i}${button.on ? '_glow' : ''}`
+                mat.albedoColor = button.on
+                    ? Color3.FromHexString(GREEN)
+                    : buttonMesh.metadata.color
+                mat.emissiveColor = Color3.Black()
+            }
         })
     }
 

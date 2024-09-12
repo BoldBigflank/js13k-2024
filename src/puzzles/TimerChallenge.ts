@@ -11,7 +11,7 @@ export class TimerChallenge {
 
     parent: BABYLON.TransformNode
     infoBillboard?: BABYLON.Mesh
-    clocks?: Clock[]
+    clocks: Clock[]
 
     solved = false
     failed = false
@@ -20,6 +20,7 @@ export class TimerChallenge {
         this.scene = scene
         this.parent = new TransformNode('TimerChallenge', this.scene)
         this.state = 'intro'
+        this.clocks = []
         // this.reset()
     }
 
@@ -36,7 +37,6 @@ export class TimerChallenge {
     }
 
     isSolved() {
-        if (debug) return true
         if (this.state !== 'running') return false
         if (this.solved) return true
         let failedClocks = 0
@@ -48,6 +48,7 @@ export class TimerChallenge {
         this.solved = runningClocks == 0 && failedClocks < 3
         if (this.solved) {
             // TODO: Run the Success event
+            this.clocks?.forEach((c) => c.stop())
         }
         return this.solved
     }
@@ -63,17 +64,19 @@ export class TimerChallenge {
 
         if (this.failed) {
             // TODO: Run the failure event
+            this.clocks?.forEach((c) => c.stop())
         }
 
         return this.failed
     }
 
     reset() {
-        this.parent.dispose()
+        this.clocks.forEach((c) => c.dispose())
+        this.clocks = []
+        // this.parent.getChildMeshes().forEach((c) => c.dispose(false, true))
         this.state = 'intro'
         this.solved = false
         this.failed = false
-        this.clocks = []
         const BOX_SIZE = 12
         const BOX_HEIGHT = 6
         const CLOCK_COUNT = debug ? 4 : 13
@@ -128,6 +131,7 @@ export class TimerChallenge {
                 0.5 * Math.PI * faceIndex
             )
             c.model.onPointerPick = () => {
+                if (this.state !== 'running') return
                 c.stop()
             }
             this.clocks?.push(c)
@@ -160,12 +164,14 @@ export class TimerChallenge {
         this.infoBillboard = infoBillboard
     }
     start() {
-        console.log('starting', this.clocks)
         this.state = 'running'
         this.infoBillboard?.setEnabled(false)
         this.clocks?.forEach((c) => c.start())
     }
     stop() {
+        this.clocks.forEach((c) => {
+            c.stop()
+        })
         this.parent.setEnabled(false)
     }
 }

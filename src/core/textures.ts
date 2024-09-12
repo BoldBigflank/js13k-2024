@@ -244,7 +244,7 @@ export const ColorMaterial = (
 ) => {
     const key = `color_${opts.glow ? 'glow_' : ''}${color}`
     if (textures[key]) return textures[key]
-    const material = new StandardMaterial(`colorMaterial${++pc}`, scene)
+    const material = new StandardMaterial(`${key}${++pc}`, scene)
     material.diffuseColor = BABYLON.Color3.FromHexString(color)
     if (opts.glow) material.emissiveColor = BABYLON.Color3.FromHexString(color)
     textures[key] = material
@@ -424,6 +424,7 @@ export const TextMaterial = (
         ctx.fillText(`${line}`, 32, 32 + fontSize * index)
     })
     const material = CanvasMaterial(canvas, scene)
+    material.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE
     textures[key] = material
     return material
 }

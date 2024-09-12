@@ -47,7 +47,11 @@ export const ClockCloud = (scene: BABYLON.Scene) => {
         s.material = ColorMaterial(BLUE, {}, scene)
         s.isPickable = false
         s.scaling = Vector3.One()
-        s.position = new Vector3(x > 0 ? x - 0.1 : x + 0.1, y - 2.5, z + 0.5)
+        s.position = new Vector3(
+            x > 0 ? x - 0.105 : x + 0.105,
+            y - 2.5,
+            z + 0.5
+        )
     })
     zClocks.forEach(([x, y, z]) => {
         const s = MeshBuilder.CreateBox(
@@ -59,7 +63,11 @@ export const ClockCloud = (scene: BABYLON.Scene) => {
         s.material = ColorMaterial(BLUE, {}, scene)
         s.isPickable = false
         s.scaling = Vector3.One()
-        s.position = new Vector3(x - 0.5, y - 2.5, z > 0 ? z - 0.1 : z + 0.1)
+        s.position = new Vector3(
+            x - 0.5,
+            y - 2.5,
+            z > 0 ? z - 0.105 : z + 0.105
+        )
     })
 
     return parent

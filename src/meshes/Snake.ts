@@ -1,4 +1,4 @@
-import { GREEN } from '@/core/Colors'
+import { DARK_GREEN } from '@/core/Colors'
 import { ColorMaterial } from '@/core/textures'
 
 const { MeshBuilder, Vector3 } = BABYLON
@@ -30,14 +30,14 @@ export const Snake = (scene: BABYLON.Scene) => {
     box.scaling = new Vector3(1 / size, 1 / size, 1 / size)
     box.visibility = 0.5
 
-    snakePos.forEach(([x, y, z]) => {
+    snakePos.forEach(([x, y, z], i) => {
         const s = MeshBuilder.CreateBox(
             `snake_box_${x}-${y}-${z}`,
-            { size: 0.8 },
+            { size: i > 0 ? 0.8 : 0.95 },
             scene
         )
         s.setParent(box)
-        s.material = ColorMaterial(GREEN, {}, scene)
+        s.material = ColorMaterial(DARK_GREEN, {}, scene)
         s.isPickable = false
         s.scaling = Vector3.One()
         s.position = new Vector3(x + 0.5, y + 0.5, z + 0.5)
