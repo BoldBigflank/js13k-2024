@@ -1,5 +1,5 @@
 import { TextMaterial } from '@/core/textures'
-import { shuffle } from '@/core/Utils'
+import { debug, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
 const { TransformNode, Vector3, MeshBuilder } = BABYLON
 
@@ -51,13 +51,24 @@ class MagicBoxPuzzle {
             this.rack.push(this.selected)
         }
         this.selected = val
+        this.rack = this.rack.filter((v) => v !== val)
+    }
+
+    selectRack(i: number) {
+        const val = this.rack[i]
+        if (!val) return
+        if (this.selected) {
+            this.rack.push(this.selected)
+        }
+        this.selected = val
+        this.rack = this.rack.filter((v) => v !== val)
     }
 
     placeTile(x: number, y: number) {
-        if (!this.selected) return
         const tileToPlace = this.selected
         this.selected = this.board[y][x]
         this.board[y][x] = tileToPlace
+        if (debug) console.log(this.toString())
     }
 
     rowSum(y: number) {
@@ -93,6 +104,14 @@ class MagicBoxPuzzle {
         })
         this.rack = shuffle([...this.rack])
     }
+    toString() {
+        let result = ''
+        this.board.forEach((row) => {
+            result += `${row.join(' ')}\n`
+        })
+        result += `*${this.rack.join('*')}*`
+        return result
+    }
 }
 
 export class MagicBoxChallenge {
@@ -119,7 +138,7 @@ export class MagicBoxChallenge {
         this.boardParent.scaling = new Vector3(1, 1, 1)
         this.rackParent = new TransformNode('Board', this.scene)
         this.rackParent.setParent(this.parent)
-        this.rackParent.position = new Vector3(-1, 1, 2)
+        this.rackParent.position = new Vector3(-2.5, 1, 2)
         this.rackParent.scaling = new Vector3(1, 1, 1)
         this.state = 'intro'
     }
@@ -206,12 +225,34 @@ export class MagicBoxChallenge {
 
     updateMeshes() {
         const { board, rack, selected } = this.puzzle
-
+        const inventoryParent = this.scene.getMeshByName('inventory-parent')
         board.forEach((row, y) => {
             row.forEach((val, x) => {
-                if (!val) return
                 // The slots
+                const slotName = `magic_box_slot_${x}-${y}`
+                let slotMesh = this.scene.getMeshByName(
+                    slotName
+                ) as InteractiveMesh
+                if (!slotMesh) {
+                    slotMesh = MeshBuilder.CreateBox(
+                        slotName,
+                        {
+                            width: 0.5,
+                            height: 0.5,
+                            depth: 0.1,
+                        },
+                        this.scene
+                    ) as InteractiveMesh
+                    slotMesh.setParent(this.boardParent)
+                    slotMesh.position = new Vector3(x, -1 * y, 0.1)
+                    slotMesh.scaling = Vector3.One()
+                    slotMesh.onPointerPick = () => {
+                        this.puzzle.placeTile(x, y)
+                        this.updateMeshes()
+                    }
+                }
 
+                if (!val) return
                 // The numbers
                 const tileName = `magic_box_tile_${val}`
                 let tileMesh = this.scene.getMeshByName(
@@ -227,18 +268,42 @@ export class MagicBoxChallenge {
                         },
                         this.scene
                     )
-                    tileMesh.setParent(this.boardParent)
-                    tileMesh.scaling = Vector3.One()
+                    tileMesh.isPickable = false
                     tileMesh.material = TextMaterial(
                         [`${val ? val / 10 : ''}`],
                         this.scene
                     )
                 }
+                tileMesh.setParent(this.boardParent)
+                tileMesh.scaling = Vector3.One()
                 tileMesh.position = new Vector3(x, -1 * y, 0)
             })
         })
 
         rack.forEach((val, i) => {
+            const slotName = `magic_box_rack_${i}`
+            let slotMesh = this.scene.getMeshByName(slotName) as InteractiveMesh
+            if (!slotMesh) {
+                slotMesh = MeshBuilder.CreateBox(
+                    slotName,
+                    {
+                        width: 0.5,
+                        height: 0.5,
+                        depth: 0.1,
+                    },
+                    this.scene
+                ) as InteractiveMesh
+                slotMesh.setParent(this.rackParent)
+                slotMesh.position = new Vector3(i, 0, 0.1)
+                slotMesh.scaling = Vector3.One()
+                slotMesh.onPointerPick = () => {
+                    // this.puzzle.selectRack(i)
+                    this.puzzle.select(this.puzzle.rack[i])
+                    this.updateMeshes()
+                }
+            }
+
+            if (!val) return
             const tileName = `magic_box_tile_${val}`
             let tileMesh = this.scene.getMeshByName(tileName) as BABYLON.Mesh
             if (!tileMesh) {
@@ -251,15 +316,40 @@ export class MagicBoxChallenge {
                     },
                     this.scene
                 )
-                tileMesh.setParent(this.rackParent)
-                tileMesh.scaling = Vector3.One()
+                tileMesh.isPickable = false
                 tileMesh.material = TextMaterial(
                     [`${val ? val / 10 : ''}`],
                     this.scene
                 )
             }
+            tileMesh.setParent(this.rackParent)
+            tileMesh.scaling = Vector3.One()
             tileMesh.position = new Vector3(1 * i, 0, 0)
         })
+
+        if (selected) {
+            const tileName = `magic_box_tile_${selected}`
+            let tileMesh = this.scene.getMeshByName(tileName) as BABYLON.Mesh
+            if (!tileMesh) {
+                tileMesh = MeshBuilder.CreatePlane(
+                    tileName,
+                    {
+                        width: 0.8,
+                        height: 0.8,
+                        sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                    },
+                    this.scene
+                )
+                tileMesh.isPickable = false
+                tileMesh.material = TextMaterial(
+                    [`${selected ? selected / 10 : ''}`],
+                    this.scene
+                )
+            }
+            tileMesh.setParent(inventoryParent)
+            tileMesh.scaling = Vector3.One()
+            tileMesh.position = new Vector3(0, 1, 0)
+        }
 
         // Update the selected item
         // Update the board
