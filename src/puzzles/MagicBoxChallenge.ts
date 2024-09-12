@@ -1,3 +1,4 @@
+import { BLUE, GREEN, ORANGE, RED } from '@/core/Colors'
 import { TextMaterial } from '@/core/textures'
 import { debug, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
@@ -24,12 +25,6 @@ const startBox = [
     [0, 0, 0],
 ]
 
-// const clues = [
-//     [0, 0],
-//     [0, 1],
-//     [1, 2],
-// ]
-
 const clues = ['0,0', '0,1', '1,2']
 
 class MagicBoxPuzzle {
@@ -46,17 +41,8 @@ class MagicBoxPuzzle {
         this.reset()
     }
 
-    select(val: number) {
-        if (this.selected) {
-            this.rack.push(this.selected)
-        }
-        this.selected = val
-        this.rack = this.rack.filter((v) => v !== val)
-    }
-
-    selectRack(i: number) {
+    pickRack(i: number) {
         const val = this.rack[i]
-        if (!val) return
         if (this.selected) {
             this.rack.push(this.selected)
         }
@@ -64,7 +50,8 @@ class MagicBoxPuzzle {
         this.rack = this.rack.filter((v) => v !== val)
     }
 
-    placeTile(x: number, y: number) {
+    pickBoard(x: number, y: number) {
+        if (clues.includes(`${x},${y}`)) return
         const tileToPlace = this.selected
         this.selected = this.board[y][x]
         this.board[y][x] = tileToPlace
@@ -211,7 +198,7 @@ export class MagicBoxChallenge {
             },
             this.scene
         ) as InteractiveMesh
-        infoBillboard.material = TextMaterial(infoText, this.scene)
+        infoBillboard.material = TextMaterial(infoText, ORANGE, this.scene)
         infoBillboard.setParent(this.parent)
         infoBillboard.isPickable = true
         infoBillboard.position = new Vector3(0, 1.5, -0.126)
@@ -228,6 +215,7 @@ export class MagicBoxChallenge {
         const inventoryParent = this.scene.getMeshByName('inventory-parent')
         board.forEach((row, y) => {
             row.forEach((val, x) => {
+                const clueSlot = clues.includes(`${x},${y}`)
                 // The slots
                 const slotName = `magic_box_slot_${x}-${y}`
                 let slotMesh = this.scene.getMeshByName(
@@ -246,10 +234,11 @@ export class MagicBoxChallenge {
                     slotMesh.setParent(this.boardParent)
                     slotMesh.position = new Vector3(x, -1 * y, 0.1)
                     slotMesh.scaling = Vector3.One()
-                    slotMesh.onPointerPick = () => {
-                        this.puzzle.placeTile(x, y)
-                        this.updateMeshes()
-                    }
+                    if (!clueSlot)
+                        slotMesh.onPointerPick = () => {
+                            this.puzzle.pickBoard(x, y)
+                            this.updateMeshes()
+                        }
                 }
 
                 if (!val) return
@@ -271,6 +260,7 @@ export class MagicBoxChallenge {
                     tileMesh.isPickable = false
                     tileMesh.material = TextMaterial(
                         [`${val ? val / 10 : ''}`],
+                        clueSlot ? GREEN : ORANGE,
                         this.scene
                     )
                 }
@@ -297,8 +287,7 @@ export class MagicBoxChallenge {
                 slotMesh.position = new Vector3(i, 0, 0.1)
                 slotMesh.scaling = Vector3.One()
                 slotMesh.onPointerPick = () => {
-                    // this.puzzle.selectRack(i)
-                    this.puzzle.select(this.puzzle.rack[i])
+                    this.puzzle.pickRack(i)
                     this.updateMeshes()
                 }
             }
@@ -319,6 +308,7 @@ export class MagicBoxChallenge {
                 tileMesh.isPickable = false
                 tileMesh.material = TextMaterial(
                     [`${val ? val / 10 : ''}`],
+                    ORANGE,
                     this.scene
                 )
             }
@@ -343,6 +333,7 @@ export class MagicBoxChallenge {
                 tileMesh.isPickable = false
                 tileMesh.material = TextMaterial(
                     [`${selected ? selected / 10 : ''}`],
+                    ORANGE,
                     this.scene
                 )
             }
@@ -350,53 +341,6 @@ export class MagicBoxChallenge {
             tileMesh.scaling = Vector3.One()
             tileMesh.position = new Vector3(0, 1, 0)
         }
-
-        // Update the selected item
-        // Update the board
-        // Update the totals
-        // Update the rack
-        // MagicBox Board
-        // food.forEach((pos) => {
-        //     let foodMesh = this.scene.getMeshByName(`food_${pos.x}-${pos.y}`)
-        //     if (!foodMesh) {
-        //         foodMesh = MeshBuilder.CreateSphere(
-        //             `food_${pos.x}-${pos.y}`,
-        //             { diameter: 1 },
-        //             this.scene
-        //         )
-        //         foodMesh.isPickable = false
-        //         foodMesh.setParent(this.boardParent)
-        //         foodMesh.scaling = Vector3.One()
-        //         foodMesh.position = new Vector3(pos.x, pos.y, 0)
-        //     }
-        //     foodMesh.metadata = { frame: this.currentFrame }
-        // })
-        // MagicBox Totals
-        // // Scoreboard
-        // if (!this.scoreboard) {
-        //     // Scoreboard
-        //     const scoreboard = MeshBuilder.CreatePlane(
-        //         'scoreboard',
-        //         {
-        //             width: 1,
-        //             height: 1,
-        //             sideOrientation: BABYLON.Mesh.DOUBLESIDE,
-        //         },
-        //         this.scene
-        //     )
-        //     scoreboard.setParent(this.parent)
-        //     scoreboard.isPickable = false
-        //     scoreboard.position = new Vector3(
-        //         0,
-        //         0.5,
-        //         this.boardParent.position.z - 0.5
-        //     )
-        //     this.scoreboard = scoreboard
-        // }
-        // this.scoreboard.material = TextMaterial(
-        //     [`${this.puzzle.score}`],
-        //     this.scene
-        // )
     }
 
     start() {

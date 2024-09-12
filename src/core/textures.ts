@@ -398,11 +398,16 @@ export const DialMaterial = (alphabet: string[], scene: BABYLON.Scene) => {
     return material
 }
 
-export const TextMaterial = (lines: string[], scene: BABYLON.Scene) => {
-    const key = `text-${lines.join('')}`
+export const TextMaterial = (
+    lines: string[],
+    color: string,
+    scene: BABYLON.Scene
+) => {
+    const key = `text-${color}-${lines.join('')}`
+    console.log(key)
     if (textures[key]) return textures[key]
     const [canvas, ctx] = initCanvas(512)
-    ctx.fillStyle = ORANGE
+    ctx.fillStyle = color
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.fillStyle = BLACK
 

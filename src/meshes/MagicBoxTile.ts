@@ -1,4 +1,4 @@
-import { ColorMaterial, TextMaterial } from '@/core/textures'
+import { ColorMaterial } from '@/core/textures'
 import { TickSFX } from '@/core/Sounds'
 import { InteractiveMesh } from '@/Types'
 

@@ -1,3 +1,4 @@
+import { ORANGE } from '@/core/Colors'
 import { ColorMaterial, TextMaterial } from '@/core/textures'
 import { InteractiveMesh } from '@/Types'
 const { TransformNode, Vector2, Vector3, MeshBuilder } = BABYLON
@@ -314,7 +315,7 @@ export class SnakeChallenge {
             },
             this.scene
         ) as InteractiveMesh
-        infoBillboard.material = TextMaterial(infoText, this.scene)
+        infoBillboard.material = TextMaterial(infoText, ORANGE, this.scene)
         infoBillboard.setParent(this.parent)
         infoBillboard.isPickable = true
         infoBillboard.position = new Vector3(0, 1.5, -0.126)
@@ -411,6 +412,7 @@ export class SnakeChallenge {
         }
         this.scoreboard.material = TextMaterial(
             [`${this.puzzle.score}`],
+            ORANGE,
             this.scene
         )
     }

@@ -1,3 +1,4 @@
+import { ORANGE } from '@/core/Colors'
 import { ColorMaterial, TextMaterial } from '@/core/textures'
 import { shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
@@ -263,7 +264,7 @@ export class ButtonChallenge {
             },
             this.scene
         ) as InteractiveMesh
-        infoBillboard.material = TextMaterial(infoText, this.scene)
+        infoBillboard.material = TextMaterial(infoText, ORANGE, this.scene)
         infoBillboard.setParent(this.parent)
         infoBillboard.isPickable = true
         infoBillboard.position = new Vector3(0, 1.5, -0.126)

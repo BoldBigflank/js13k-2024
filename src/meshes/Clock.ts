@@ -1,6 +1,7 @@
 import { ColorMaterial, TextMaterial } from '@/core/textures'
 import { TickSFX } from '@/core/Sounds'
 import { InteractiveMesh } from '@/Types'
+import { ORANGE } from '@/core/Colors'
 
 const { TransformNode, MeshBuilder, Vector3 } = BABYLON
 let pc = 0
@@ -109,6 +110,7 @@ export class Clock {
                 if (this.face)
                     this.face.material = TextMaterial(
                         [`${this.value}`],
+                        ORANGE,
                         this.scene
                     )
             }

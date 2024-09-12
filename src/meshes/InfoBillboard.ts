@@ -1,3 +1,4 @@
+import { ORANGE } from '@/core/Colors'
 import { TextMaterial } from '@/core/textures'
 
 const { TransformNode, MeshBuilder, Vector3 } = BABYLON
@@ -29,12 +30,13 @@ export class InfoBillboard {
     }
 
     setLines = (lines: string[]) => {
-        this.billboard.material = TextMaterial(lines, this.scene)
+        this.billboard.material = TextMaterial(lines, ORANGE, this.scene)
     }
 
     setEndgame = () => {
         this.billboard.material = TextMaterial(
             ['Thanks for playing!'],
+            ORANGE,
             this.scene
         )
         this.billboard.rotation = Vector3.Zero()

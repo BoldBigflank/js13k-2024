@@ -1,3 +1,4 @@
+import { ORANGE } from '@/core/Colors'
 import { TextMaterial } from '@/core/textures'
 import { debug, shuffle } from '@/core/Utils'
 import { Clock } from '@/meshes/Clock'
@@ -146,6 +147,7 @@ export class TimerChallenge {
                 'Stop too soon or ',
                 'miss too many and you will fail',
             ],
+            ORANGE,
             this.scene
         )
         infoBillboard.setParent(this.parent)
