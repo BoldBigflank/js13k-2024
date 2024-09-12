@@ -1,6 +1,6 @@
 import { ORANGE } from '@/core/Colors'
 import { ColorMaterial, TextMaterial } from '@/core/textures'
-import { shuffle } from '@/core/Utils'
+import { debug, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
 const { TransformNode, Vector3, MeshBuilder } = BABYLON
 
@@ -158,6 +158,7 @@ export class ButtonChallenge {
     }
 
     isSolved() {
+        if (debug) return true
         if (this.state !== 'running') return false
         if (this.solved) return true
         if (this.puzzle.isSolved()) {
@@ -176,8 +177,8 @@ export class ButtonChallenge {
 
     reset() {
         // Remove the lights, buttons, walls
-        this.buttonsParent.dispose()
-        this.lightsParent.dispose()
+        // this.buttonsParent.dispose()
+        // this.lightsParent.dispose()
         this.state = 'intro'
         this.solved = false
         this.failed = false

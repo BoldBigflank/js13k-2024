@@ -242,9 +242,9 @@ export const ColorMaterial = (
     opts: ColorOpts,
     scene: BABYLON.Scene
 ) => {
-    const key = `color${color}${opts.glow ? 'glow' : ''}`
+    const key = `color_${opts.glow ? 'glow_' : ''}${color}`
     if (textures[key]) return textures[key]
-    const material = new StandardMaterial(`billboardMaterial${++pc}`, scene)
+    const material = new StandardMaterial(`colorMaterial${++pc}`, scene)
     material.diffuseColor = BABYLON.Color3.FromHexString(color)
     if (opts.glow) material.emissiveColor = BABYLON.Color3.FromHexString(color)
     textures[key] = material

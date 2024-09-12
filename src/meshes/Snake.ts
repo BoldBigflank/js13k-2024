@@ -1,3 +1,6 @@
+import { GREEN } from '@/core/Colors'
+import { ColorMaterial } from '@/core/textures'
+
 const { MeshBuilder, Vector3 } = BABYLON
 
 const snakePos = [
@@ -17,14 +20,15 @@ const snakePos = [
 ]
 export const Snake = (scene: BABYLON.Scene) => {
     const size = 4
-    const parent = BABYLON.MeshBuilder.CreateBox(
-        `thirteen`,
-        { size: size },
-        scene
-    )
+    const parent = new BABYLON.TransformNode(`snake_parent`, scene)
+    parent.metadata = {
+        offsetY: 0.5,
+    }
+    const box = BABYLON.MeshBuilder.CreateBox(`snake`, { size: size }, scene)
+    box.setParent(parent)
     // normalize
-    parent.scaling = new Vector3(1 / size, 1 / size, 1 / size)
-    parent.visibility = 0.5
+    box.scaling = new Vector3(1 / size, 1 / size, 1 / size)
+    box.visibility = 0.5
 
     snakePos.forEach(([x, y, z]) => {
         const s = MeshBuilder.CreateBox(
@@ -32,7 +36,9 @@ export const Snake = (scene: BABYLON.Scene) => {
             { size: 0.8 },
             scene
         )
-        s.setParent(parent)
+        s.setParent(box)
+        s.material = ColorMaterial(GREEN, {}, scene)
+        s.isPickable = false
         s.scaling = Vector3.One()
         s.position = new Vector3(x + 0.5, y + 0.5, z + 0.5)
     })

@@ -1,3 +1,6 @@
+import { BLUE } from '@/core/Colors'
+import { ColorMaterial } from '@/core/textures'
+
 const { MeshBuilder, Vector3 } = BABYLON
 
 const zClocks = [
@@ -20,14 +23,19 @@ const xClocks = [
 ]
 export const ClockCloud = (scene: BABYLON.Scene) => {
     const size = 4
-    const parent = BABYLON.MeshBuilder.CreateBox(
-        `thirteen`,
+    const parent = new BABYLON.TransformNode(`clock_cloud_parent`, scene)
+    parent.metadata = {
+        offsetY: 1,
+    }
+    const box = BABYLON.MeshBuilder.CreateBox(
+        `clock_cloud`,
         { size: size },
         scene
     )
+    box.setParent(parent)
     // normalize
-    parent.scaling = new Vector3(1 / size, 1 / size, 1 / size)
-    parent.visibility = 0.5
+    box.scaling = new Vector3(1 / size, 1 / size, 1 / size)
+    box.visibility = 0.5
 
     xClocks.forEach(([x, y, z]) => {
         const s = MeshBuilder.CreateBox(
@@ -35,7 +43,9 @@ export const ClockCloud = (scene: BABYLON.Scene) => {
             { width: 0.2, height: 0.8, depth: 0.8 },
             scene
         )
-        s.setParent(parent)
+        s.setParent(box)
+        s.material = ColorMaterial(BLUE, {}, scene)
+        s.isPickable = false
         s.scaling = Vector3.One()
         s.position = new Vector3(x > 0 ? x - 0.1 : x + 0.1, y - 2.5, z + 0.5)
     })
@@ -45,7 +55,9 @@ export const ClockCloud = (scene: BABYLON.Scene) => {
             { width: 0.8, height: 0.8, depth: 0.2 },
             scene
         )
-        s.setParent(parent)
+        s.setParent(box)
+        s.material = ColorMaterial(BLUE, {}, scene)
+        s.isPickable = false
         s.scaling = Vector3.One()
         s.position = new Vector3(x - 0.5, y - 2.5, z > 0 ? z - 0.1 : z + 0.1)
     })

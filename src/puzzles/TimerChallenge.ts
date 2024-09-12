@@ -36,6 +36,7 @@ export class TimerChallenge {
     }
 
     isSolved() {
+        if (debug) return true
         if (this.state !== 'running') return false
         if (this.solved) return true
         let failedClocks = 0

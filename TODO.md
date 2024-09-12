@@ -39,6 +39,7 @@ General
 -   Make a failure animation/sfx
 -   Make a success animation/sfx
 -   Reset properly, and disable completed rooms
+-   zzfx don't autoplay
 
 Victory Area
 

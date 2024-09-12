@@ -40,19 +40,20 @@ const init = async () => {
     const engine = new Engine(canvas, true)
     const scene = new Scene(engine)
     const gl = new BABYLON.GlowLayer('glow', scene)
-    gl.customEmissiveColorSelector = function (
-        mesh,
-        subMesh,
-        material,
-        result
-    ) {
+    gl.customEmissiveColorSelector = (mesh, subMesh, material, result) => {
         if (mesh.name.includes('glow_')) {
             result.set(1, 1, 1, 1)
         } else {
             result.set(0, 0, 0, 0)
         }
     }
-    let activePuzzle: TimerChallenge | null = null
+    let activePuzzle:
+        | TimerChallenge
+        | ButtonChallenge
+        | SnakeChallenge
+        | MagicBoxChallenge
+        | null = null
+    let activePuzzleBox: BABYLON.Nullable<InteractiveMesh> = null
     const puzzles = []
     const puzzleBoxes: BABYLON.TransformNode = new BABYLON.TransformNode(
         'puzzleBoxes',
@@ -214,6 +215,7 @@ const init = async () => {
     timerBox.position = new Vector3(0, 0.5, 2)
     timerBox.onPointerPick = () => {
         activePuzzle = timerChallenge
+        activePuzzleBox = timerBox
         timerChallenge.model.setEnabled(true)
         timerChallenge.reset()
         puzzleBoxes.setEnabled(false)
@@ -225,6 +227,7 @@ const init = async () => {
     buttonBox.position = new Vector3(2, 0.5, 0)
     buttonBox.onPointerPick = () => {
         activePuzzle = buttonChallenge
+        activePuzzleBox = buttonBox
         buttonChallenge.model.setEnabled(true)
         buttonChallenge.reset()
         puzzleBoxes.setEnabled(false)
@@ -236,6 +239,7 @@ const init = async () => {
     snakeBox.position = new Vector3(0, 0.5, -2)
     snakeBox.onPointerPick = () => {
         activePuzzle = snakeChallenge
+        activePuzzleBox = snakeBox
         snakeChallenge.model.setEnabled(true)
         snakeChallenge.reset()
         puzzleBoxes.setEnabled(false)
@@ -247,6 +251,7 @@ const init = async () => {
     magicBoxBox.position = new Vector3(-2, 0.5, 0)
     magicBoxBox.onPointerPick = () => {
         activePuzzle = magicBoxChallenge
+        activePuzzleBox = magicBoxBox
         magicBoxChallenge.model.setEnabled(true)
         magicBoxChallenge.reset()
         puzzleBoxes.setEnabled(false)
@@ -258,10 +263,26 @@ const init = async () => {
         if (activePuzzle.isSolved()) {
             activePuzzle.stop()
             activePuzzle = null
+            if (activePuzzleBox) {
+                activePuzzleBox.isPickable = false
+                activePuzzleBox.onPointerPick = undefined
+                activePuzzleBox.position = new Vector3(
+                    0,
+                    1 + activePuzzleBox.metadata.offsetY,
+                    0
+                )
+                activePuzzleBox.scaling = new Vector3(2, 2, 2)
+                activePuzzleBox.getChildMeshes(true).forEach((c) => {
+                    c.visibility = 0
+                    c.isPickable = false
+                })
+                activePuzzleBox = null
+            }
             puzzleBoxes.setEnabled(true)
         } else if (activePuzzle.isFailed()) {
             activePuzzle?.stop()
             activePuzzle = null
+            activePuzzleBox = null
             puzzleBoxes.setEnabled(true)
         }
     })

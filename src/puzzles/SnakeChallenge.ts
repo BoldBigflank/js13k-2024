@@ -1,5 +1,6 @@
 import { ORANGE } from '@/core/Colors'
 import { ColorMaterial, TextMaterial } from '@/core/textures'
+import { debug } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
 const { TransformNode, Vector2, Vector3, MeshBuilder } = BABYLON
 
@@ -203,6 +204,7 @@ export class SnakeChallenge {
     }
 
     isSolved() {
+        if (debug) return true
         if (this.state !== 'running') return false
         if (this.solved) return true
         if (this.puzzle.isSolved()) {
