@@ -1,13 +1,17 @@
 import type { InteractiveMesh } from '@/Types'
-import { GrassMaterial, CursorMaterial } from './core/textures'
+import { CursorMaterial, ColorTextureMaterial } from './core/textures'
 import { AnimationFactory } from './core/Animation'
 import { debug } from './core/Utils'
 import { TexturedMeshNME } from './shaders/TexturedMeshNME'
-import { SPANISH_BLUE, WHITE } from './core/Colors'
+import { GREEN, SPANISH_BLUE, WHITE } from './core/Colors'
 import { TimerChallenge } from './puzzles/TimerChallenge'
 import { ButtonChallenge } from './puzzles/ButtonChallenge'
 import { SnakeChallenge } from './puzzles/SnakeChallenge'
 import { MagicBoxChallenge } from './puzzles/MagicBoxChallenge'
+import { ClockCloud } from './meshes/ClockCloud'
+import { BoxBase } from './meshes/BoxBase'
+import { Snake } from './meshes/Snake'
+import { Thirteen } from './meshes/Thirteen'
 
 const {
     Engine,
@@ -36,6 +40,18 @@ const init = async () => {
     const engine = new Engine(canvas, true)
     const scene = new Scene(engine)
     const gl = new BABYLON.GlowLayer('glow', scene)
+    gl.customEmissiveColorSelector = function (
+        mesh,
+        subMesh,
+        material,
+        result
+    ) {
+        if (mesh.name.includes('glow_')) {
+            result.set(1, 1, 1, 1)
+        } else {
+            result.set(0, 0, 0, 0)
+        }
+    }
     let activePuzzle: TimerChallenge | null = null
     const puzzles = []
     const puzzleBoxes: BABYLON.TransformNode = new BABYLON.TransformNode(
@@ -167,40 +183,35 @@ const init = async () => {
             h: 10,
         },
     })
-    ground.material = GrassMaterial(scene)
+    ground.material = ColorTextureMaterial(GREEN, scene)
     ground.checkCollisions = true
     ground.position.y = -0.01
 
     // *** PLACE PUZZLES HERE ***
 
-    // // Red Room
-    // const glob = new GlobPortal(scene)
-    // glob.position = Vector3.Zero()
-
-    // Clock Challenge
+    // Puzzle 1 - Timer
     const timerChallenge = new TimerChallenge(scene)
     timerChallenge.model.setEnabled(false)
     puzzles.push(timerChallenge)
-    // activePuzzle = puzzles[0]
 
+    // Puzzle 2 - Buttons
     const buttonChallenge = new ButtonChallenge(scene)
     buttonChallenge.model.setEnabled(false)
     puzzles.push(buttonChallenge)
 
+    // Puzzle 3 - Snake
     const snakeChallenge = new SnakeChallenge(scene)
     snakeChallenge.model.setEnabled(false)
     puzzles.push(snakeChallenge)
 
+    // Puzzle 4 - Magic Box
     const magicBoxChallenge = new MagicBoxChallenge(scene)
     magicBoxChallenge.model.setEnabled(false)
     puzzles.push(magicBoxChallenge)
 
-    const timerBox = BABYLON.MeshBuilder.CreateBox(
-        'timerChallengeBox',
-        { size: 0.3 },
-        scene
-    ) as InteractiveMesh
-    timerBox.position = new Vector3(0, 2, 0)
+    // Puzzle 1 - Timer
+    const timerBox = ClockCloud(scene) as InteractiveMesh
+    timerBox.position = new Vector3(0, 0.5, 2)
     timerBox.onPointerPick = () => {
         activePuzzle = timerChallenge
         timerChallenge.model.setEnabled(true)
@@ -209,12 +220,20 @@ const init = async () => {
     }
     timerBox.setParent(puzzleBoxes)
 
-    const snakeBox = BABYLON.MeshBuilder.CreateBox(
-        'snakeChallengeBox',
-        { size: 0.3 },
-        scene
-    ) as InteractiveMesh
-    snakeBox.position = new Vector3(1, 2, 0)
+    // Puzzle 2 - Buttons
+    const buttonBox = Thirteen(scene) as InteractiveMesh
+    buttonBox.position = new Vector3(2, 0.5, 0)
+    buttonBox.onPointerPick = () => {
+        activePuzzle = buttonChallenge
+        buttonChallenge.model.setEnabled(true)
+        buttonChallenge.reset()
+        puzzleBoxes.setEnabled(false)
+    }
+    buttonBox.setParent(puzzleBoxes)
+
+    // Puzzle 3 - Snake
+    const snakeBox = Snake(scene) as InteractiveMesh
+    snakeBox.position = new Vector3(0, 0.5, -2)
     snakeBox.onPointerPick = () => {
         activePuzzle = snakeChallenge
         snakeChallenge.model.setEnabled(true)
@@ -223,12 +242,9 @@ const init = async () => {
     }
     snakeBox.setParent(puzzleBoxes)
 
-    const magicBoxBox = BABYLON.MeshBuilder.CreateBox(
-        'magicBoxChallengeBox',
-        { size: 0.3 },
-        scene
-    ) as InteractiveMesh
-    magicBoxBox.position = new Vector3(1, 1, 0)
+    // Puzzle 4 - Magic Box
+    const magicBoxBox = BoxBase(scene) as InteractiveMesh
+    magicBoxBox.position = new Vector3(-2, 0.5, 0)
     magicBoxBox.onPointerPick = () => {
         activePuzzle = magicBoxChallenge
         magicBoxChallenge.model.setEnabled(true)
@@ -236,20 +252,6 @@ const init = async () => {
         puzzleBoxes.setEnabled(false)
     }
     magicBoxBox.setParent(puzzleBoxes)
-
-    const buttonBox = BABYLON.MeshBuilder.CreateBox(
-        'buttonChallengeBox',
-        { size: 0.3 },
-        scene
-    ) as InteractiveMesh
-    buttonBox.position = new Vector3(-1, 2, 0)
-    buttonBox.onPointerPick = () => {
-        activePuzzle = buttonChallenge
-        buttonChallenge.model.setEnabled(true)
-        buttonChallenge.reset()
-        puzzleBoxes.setEnabled(false)
-    }
-    buttonBox.setParent(puzzleBoxes)
 
     scene.registerBeforeRender(() => {
         if (!activePuzzle) return
@@ -300,9 +302,8 @@ const init = async () => {
         inventoryParent.position = new Vector3(-0.5, 0, 2)
         inventoryParent.rotation = Vector3.Zero()
     })
-    // xr.input.controllers.forEach((controller) => {
-    // })
     xr.baseExperience.onStateChangedObservable.add((state) => {
+        console.log('state', state, BABYLON.WebXRState.IN_XR)
         inXRMode = state === BABYLON.WebXRState.IN_XR
         cursor.isEnabled(!inXRMode)
         if (!inXRMode) {

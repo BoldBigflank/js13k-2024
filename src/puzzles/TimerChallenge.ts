@@ -75,7 +75,7 @@ export class TimerChallenge {
         this.clocks = []
         const BOX_SIZE = 12
         const BOX_HEIGHT = 6
-        const CLOCK_COUNT = debug ? 1 : 13
+        const CLOCK_COUNT = debug ? 4 : 13
 
         // Make the walls
         const color = BABYLON.Color3.Random()

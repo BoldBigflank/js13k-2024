@@ -254,7 +254,7 @@ export const ColorMaterial = (
 export const ColorTextureMaterial = (color: string, scene: BABYLON.Scene) => {
     const key = `colortexture${color}`
     if (textures[key]) return textures[key]
-    const material = new StandardMaterial(`billboardMaterial${++pc}`, scene)
+    const material = new StandardMaterial(`standardMaterial${++pc}`, scene)
     material.diffuseColor = BABYLON.Color3.FromHexString(color)
     const canvas = PerlinNoise()
     const texture = Texture.LoadFromDataString(
@@ -404,7 +404,6 @@ export const TextMaterial = (
     scene: BABYLON.Scene
 ) => {
     const key = `text-${color}-${lines.join('')}`
-    console.log(key)
     if (textures[key]) return textures[key]
     const [canvas, ctx] = initCanvas(512)
     ctx.fillStyle = color
