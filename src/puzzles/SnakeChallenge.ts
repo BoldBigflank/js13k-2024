@@ -282,6 +282,7 @@ export class SnakeChallenge {
             this.boardParent.position.z
         )
         plane.isPickable = true
+        plane.visibility = 0
         const buddy = MeshBuilder.CreateSphere(
             'buddy',
             {

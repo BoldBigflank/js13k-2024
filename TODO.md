@@ -1,5 +1,13 @@
 # TODO
 
+Make a Magic Box puzzle
+Make an opening area and a statue to complete
+
+-   Snake - 13 box pattern
+-   Buttons - Number 13
+-   Magic Box - 9 cube base
+-   Timers - Box particles
+
 3/4 Puzzles
 
 -   Clock Stoppers - Stop each clock at 13s; failing kicks you out
