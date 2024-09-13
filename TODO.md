@@ -4,7 +4,6 @@
 
 Timers
 
--   Display lives
 -   Stop Animation/Particles
 
 Buttons

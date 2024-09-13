@@ -10,7 +10,11 @@ const BOX_HEIGHT = 6
 const BOX_SIZE = 12
 const TICK_RATE = 400
 
-const infoText = ['Eat apples to grow', 'to size 13.', "Don't get stuck."]
+const infoText = [
+    'Lead the snake to apples',
+    'Grow to size 13.',
+    "Don't get stuck.",
+]
 
 type Direction = 'up' | 'down' | 'left' | 'right'
 
@@ -80,7 +84,9 @@ class SnakePuzzle {
     }
     spaceHasSnakes(pos: BABYLON.Vector2) {
         return this.snakes.some(
-            (s) => s.alive && s.body.some((b) => b.equals(pos))
+            (s) =>
+                s.alive &&
+                s.body.some((b, i) => i !== s.body.length - 1 && b.equals(pos))
         )
     }
     spaceIsEmpty(pos: BABYLON.Vector2) {
@@ -291,7 +297,7 @@ export class SnakeChallenge {
         plane.isPickable = true
         plane.visibility = 0
         const buddy = MeshBuilder.CreateSphere(
-            'buddy',
+            'laser_buddy',
             {
                 diameter: 0.1,
             },
@@ -388,7 +394,7 @@ export class SnakeChallenge {
             let foodMesh = this.scene.getMeshByName(`food_${pos.x}-${pos.y}`)
             if (!foodMesh) {
                 foodMesh = MeshBuilder.CreateSphere(
-                    `food_${pos.x}-${pos.y}`,
+                    `laser_food_${pos.x}-${pos.y}`,
                     { diameter: 1 },
                     this.scene
                 )

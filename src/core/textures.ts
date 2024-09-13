@@ -417,7 +417,7 @@ export const TextMaterial = (
     let fontSize = 64
     if (lines.length > 0) {
         const m = ctx.measureText(lines[0])
-        fontSize = (64 * (512 - 64)) / m.width
+        fontSize = Math.min((64 * (512 - 64)) / m.width, 512)
         ctx.font = `${fontSize}px Helvetica`
     }
     lines.forEach((line, index) => {

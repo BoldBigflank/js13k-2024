@@ -1,6 +1,6 @@
 import { AnimationFactory } from '@/core/Animation'
-import { GREEN, LIGHT_GREEN, ORANGE, YELLOW } from '@/core/Colors'
-import { TextMaterial } from '@/core/textures'
+import { GREEN, LIGHT_GREEN, ORANGE, WHITE, YELLOW } from '@/core/Colors'
+import { ColorMaterial, TextMaterial } from '@/core/textures'
 import { debug, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
 const { TransformNode, Vector3, MeshBuilder } = BABYLON
@@ -283,8 +283,8 @@ export class MagicBoxChallenge {
                     slotMesh = MeshBuilder.CreateBox(
                         slotName,
                         {
-                            width: 0.5,
-                            height: 0.5,
+                            width: 0.85,
+                            height: 0.85,
                             depth: 0.1,
                         },
                         this.scene
@@ -292,6 +292,11 @@ export class MagicBoxChallenge {
                     slotMesh.setParent(this.boardParent)
                     slotMesh.position = new Vector3(x, -1 * y, 0.1)
                     slotMesh.scaling = Vector3.One()
+                    slotMesh.material = ColorMaterial(
+                        WHITE,
+                        { glow: true },
+                        this.scene
+                    )
                     if (!clueSlot)
                         slotMesh.onPointerPick = () => {
                             this.puzzle.pickBoard(x, y)
@@ -342,13 +347,18 @@ export class MagicBoxChallenge {
                 slotMesh = MeshBuilder.CreateBox(
                     slotName,
                     {
-                        width: 0.5,
-                        height: 0.5,
+                        width: 0.85,
+                        height: 0.85,
                         depth: 0.1,
                     },
                     this.scene
                 ) as InteractiveMesh
                 slotMesh.setParent(this.rackParent)
+                slotMesh.material = ColorMaterial(
+                    WHITE,
+                    { glow: true },
+                    this.scene
+                )
                 slotMesh.position = new Vector3(i, 0, 0.1)
                 slotMesh.scaling = Vector3.One()
                 slotMesh.onPointerPick = () => {

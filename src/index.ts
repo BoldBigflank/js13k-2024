@@ -46,6 +46,8 @@ const init = async () => {
             result.set(1, 1, 1, 1)
         } else if (material.name.includes('glow')) {
             result.set(0.5, 0.5, 0.5, 1)
+        } else if (mesh.name.includes('laser')) {
+            result.set(1, 0, 0, 1)
         } else {
             result.set(0, 0, 0, 0)
         }

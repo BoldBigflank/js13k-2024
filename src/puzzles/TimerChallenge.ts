@@ -1,4 +1,4 @@
-import { ORANGE } from '@/core/Colors'
+import { BLUE, ORANGE } from '@/core/Colors'
 import { TextMaterial } from '@/core/textures'
 import { debug, shuffle } from '@/core/Utils'
 import { Clock } from '@/meshes/Clock'
@@ -11,16 +11,19 @@ export class TimerChallenge {
 
     parent: BABYLON.TransformNode
     infoBillboard?: BABYLON.Mesh
+    scoreboardMesh?: BABYLON.Mesh
     clocks: Clock[]
 
     solved = false
     failed = false
+    failedClocks = -1
 
     constructor(scene: BABYLON.Scene) {
         this.scene = scene
         this.parent = new TransformNode('TimerChallenge', this.scene)
         this.state = 'intro'
         this.clocks = []
+        this.failedClocks = -1
         // this.reset()
     }
 
@@ -46,6 +49,31 @@ export class TimerChallenge {
             if (c.state === 'running') runningClocks++
         })
         this.solved = runningClocks == 0 && failedClocks < 3
+
+        if (failedClocks !== this.failedClocks) {
+            // Update the scoreboard
+            if (!this.scoreboardMesh) {
+                const scoreboardMesh = MeshBuilder.CreatePlane(
+                    'scoreboard',
+                    {
+                        width: 2,
+                        height: 1,
+                        sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                    },
+                    this.scene
+                )
+                scoreboardMesh.setParent(this.parent)
+                scoreboardMesh.position = new Vector3(0, 0.25, 2)
+                this.scoreboardMesh = scoreboardMesh
+            }
+            this.scoreboardMesh.material = TextMaterial(
+                [`Lives: ${3 - failedClocks}`],
+                BLUE,
+                this.scene
+            )
+            this.failedClocks = failedClocks
+        }
+
         if (this.solved) {
             // TODO: Run the Success event
             this.clocks?.forEach((c) => c.stop())
@@ -137,41 +165,46 @@ export class TimerChallenge {
             this.clocks?.push(c)
         }
         // Make an instructional sign
-        const infoBillboard = MeshBuilder.CreatePlane(
-            'billboard',
-            {
-                width: 2,
-                height: 1,
-                sideOrientation: BABYLON.Mesh.DOUBLESIDE,
-            },
-            this.scene
-        ) as InteractiveMesh
-        infoBillboard.material = TextMaterial(
-            [
-                'Stop the clocks at 13 seconds.',
-                'Stop too soon or ',
-                'miss too many and you will fail',
-            ],
-            ORANGE,
-            this.scene
-        )
-        infoBillboard.setParent(this.parent)
-        infoBillboard.isPickable = true
-        infoBillboard.position = new Vector3(0, 1.5, -0.126)
-        infoBillboard.onPointerPick = () => {
-            this.start()
+        if (!this.infoBillboard) {
+            const infoBillboard = MeshBuilder.CreatePlane(
+                'billboard',
+                {
+                    width: 2,
+                    height: 1,
+                    sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                },
+                this.scene
+            ) as InteractiveMesh
+            infoBillboard.material = TextMaterial(
+                [
+                    'Stop the clocks at 13 seconds.',
+                    'Stop too soon or ',
+                    'miss too many and you will fail',
+                ],
+                ORANGE,
+                this.scene
+            )
+            infoBillboard.setParent(this.parent)
+            infoBillboard.isPickable = true
+            infoBillboard.position = new Vector3(0, 1.5, -0.126)
+            infoBillboard.onPointerPick = () => {
+                this.start()
+            }
+            this.infoBillboard = infoBillboard
         }
-        this.infoBillboard = infoBillboard
+        this.infoBillboard.setEnabled(true)
     }
     start() {
         this.state = 'running'
         this.infoBillboard?.setEnabled(false)
+        this.scoreboardMesh?.setEnabled(true)
         this.clocks?.forEach((c) => c.start())
     }
     stop() {
         this.clocks.forEach((c) => {
             c.stop()
         })
+        this.scoreboardMesh?.setEnabled(false)
         this.parent.setEnabled(false)
     }
 }

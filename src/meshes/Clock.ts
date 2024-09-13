@@ -129,7 +129,6 @@ export class Clock {
 
     stop() {
         this.value === this.target ? this.pass() : this.fail()
-        this.scene.unregisterBeforeRender(observable)
     }
 
     pass() {
