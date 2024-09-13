@@ -13,6 +13,21 @@ import { BoxBase } from './meshes/BoxBase'
 import { Snake } from './meshes/Snake'
 import { Thirteen } from './meshes/Thirteen'
 import { LevelChangeSFX, SolvedSFX } from './core/Sounds'
+import { TransformNode } from 'babylonjs'
+
+const LOCALSTORAGE_KEY = 'boldbigflank-js13k2024'
+
+const getProgress = (game: string) => {
+    const raw = localStorage.getItem(LOCALSTORAGE_KEY) || '{}'
+    const progress = JSON.parse(raw)
+    return progress[game] || false
+}
+const saveProgress = (game: string, value: boolean) => {
+    const raw = localStorage.getItem(LOCALSTORAGE_KEY) || '{}'
+    const progress = JSON.parse(raw)
+    progress[game] = value
+    localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(progress))
+}
 
 const {
     Engine,
@@ -284,9 +299,40 @@ const init = async () => {
     }
     magicBoxBox.setParent(puzzleBoxes)
 
+    const checkPuzzleboxIsSolved = (puzzleBox: InteractiveMesh) => {
+        if (getProgress(puzzleBox.name)) {
+            puzzleBox.isPickable = false
+            puzzleBox.onPointerPick = undefined
+            AnimationFactory.Instance.animateTransform({
+                mesh: puzzleBox,
+                end: {
+                    position: new Vector3(0, 1 + puzzleBox.metadata.offsetY, 0),
+                    scaling: new Vector3(2, 2, 2),
+                    rotation: new Vector3(0, 2 * Math.PI, 0),
+                },
+                duration: 1000,
+            })
+            puzzleBox.position = new Vector3(
+                0,
+                1 + puzzleBox.metadata.offsetY,
+                0
+            )
+            puzzleBox.scaling = new Vector3(2, 2, 2)
+            puzzleBox.getChildMeshes(true).forEach((c) => {
+                c.visibility = 0
+                c.isPickable = false
+            })
+        }
+    }
+    checkPuzzleboxIsSolved(timerBox)
+    checkPuzzleboxIsSolved(buttonBox)
+    checkPuzzleboxIsSolved(snakeBox)
+    checkPuzzleboxIsSolved(magicBoxBox)
+
     scene.registerBeforeRender(() => {
         if (!activePuzzle) return
         if (activePuzzle.isSolved()) {
+            if (activePuzzleBox) saveProgress(activePuzzleBox.name, true)
             SolvedSFX()
             activePuzzle.stop()
             activePuzzle = null
@@ -306,12 +352,6 @@ const init = async () => {
                     },
                     duration: 1000,
                 })
-                activePuzzleBox.position = new Vector3(
-                    0,
-                    1 + activePuzzleBox.metadata.offsetY,
-                    0
-                )
-                activePuzzleBox.scaling = new Vector3(2, 2, 2)
                 activePuzzleBox.getChildMeshes(true).forEach((c) => {
                     c.visibility = 0
                     c.isPickable = false
