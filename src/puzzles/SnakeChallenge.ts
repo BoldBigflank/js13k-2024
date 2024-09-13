@@ -3,8 +3,7 @@ import { BLACK, DARK_GREEN, ORANGE, RED } from '@/core/Colors'
 import { ColorMaterial, TextMaterial } from '@/core/textures'
 import { debug } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
-import { Color3 } from 'babylonjs'
-const { TransformNode, Vector2, Vector3, MeshBuilder } = BABYLON
+const { TransformNode, Color3, Vector2, Vector3, MeshBuilder } = BABYLON
 
 const BOX_HEIGHT = 6
 const BOX_SIZE = 12
@@ -189,6 +188,7 @@ export class SnakeChallenge {
         this.puzzle = new SnakePuzzle()
         this.parent = new TransformNode('SnakeChallenge', this.scene)
         this.boardParent = new TransformNode('BoardParent', this.scene)
+        this.boardParent.setParent(this.parent)
         this.state = 'intro'
         this.elapsedMs = 0
         this.currentFrame = 0
@@ -241,9 +241,10 @@ export class SnakeChallenge {
     }
     reset() {
         this.parent.getChildMeshes().forEach((c) => c.dispose())
-        this.boardParent = new TransformNode('Board', this.scene)
+        if (this.boardParent) this.boardParent.dispose()
+        this.boardParent = new TransformNode('BoardParent', this.scene)
         this.boardParent.setParent(this.parent)
-        this.boardParent.position = new Vector3(-3.5, 1, 3)
+        this.boardParent.position = new Vector3(-2.25, 1, 3)
         this.boardParent.scaling = new Vector3(0.5, 0.5, 0.5)
 
         this.puzzle = new SnakePuzzle()

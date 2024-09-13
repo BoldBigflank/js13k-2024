@@ -78,7 +78,7 @@ const init = async () => {
     // *** CAMERA ***
     const camera = new UniversalCamera(
         'MainCamera',
-        new Vector3(0, 1.615, -5),
+        new Vector3(0, 1.615, -4),
         scene
     )
     camera.inertia = 0
@@ -193,6 +193,22 @@ const init = async () => {
     ground.checkCollisions = true
     ground.position.y = -0.01
 
+    // VR Ground
+    const vrFloor = MeshBuilder.CreateTiledGround('ground', {
+        xmin: -3,
+        xmax: 3,
+        zmin: -3,
+        zmax: 3,
+        subdivisions: {
+            w: 2,
+            h: 1,
+        },
+    })
+    vrFloor.position.z = camera.position.z
+    vrFloor.checkCollisions = true
+    vrFloor.visibility = 0.2
+    vrFloor.position.y = -0.02
+
     // *** PLACE PUZZLES HERE ***
 
     // Puzzle 1 - Timer
@@ -296,14 +312,15 @@ const init = async () => {
     const bounds = MeshBuilder.CreateBox(
         'bounds',
         {
-            width: 58,
+            width: 12,
             height: 5,
-            depth: 32,
+            depth: 12,
             sideOrientation: BABYLON.Mesh.BACKSIDE,
         },
         scene
     )
-    bounds.position = new Vector3(4, 0, 28)
+    bounds.isPickable = false
+    bounds.position = new Vector3(0, 2.5, 0)
     bounds.checkCollisions = true
     bounds.visibility = 0
 
@@ -312,7 +329,7 @@ const init = async () => {
 
     // WebXR
     const xr = await scene.createDefaultXRExperienceAsync({
-        floorMeshes: [ground], // TODO: Add Floors from puzzles
+        floorMeshes: [vrFloor], // TODO: Add Floors from puzzles
     })
     xr.input.onControllerAddedObservable.add((controller) => {
         controller.onMotionControllerInitObservable.add((motionController) => {
