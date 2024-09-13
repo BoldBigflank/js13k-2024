@@ -30,8 +30,6 @@ General
 -   Reset properly, and disable completed rooms
 -   zzfx don't autoplay
 -   Make a failure animation
--   Make a success animation
--   localstorage to save progress
 
 ## SFX
 

@@ -1,9 +1,13 @@
 import type { InteractiveMesh } from '@/Types'
-import { CursorMaterial, ColorTextureMaterial } from './core/textures'
+import {
+    CursorMaterial,
+    ColorTextureMaterial,
+    TextMaterial,
+} from './core/textures'
 import { AnimationFactory } from './core/Animation'
 import { debug } from './core/Utils'
 import { TexturedMeshNME } from './shaders/TexturedMeshNME'
-import { LIGHT_GREEN, SPANISH_BLUE, WHITE } from './core/Colors'
+import { LIGHT_GREEN, ORANGE, SPANISH_BLUE, WHITE } from './core/Colors'
 import { TimerChallenge } from './puzzles/TimerChallenge'
 import { ButtonChallenge } from './puzzles/ButtonChallenge'
 import { SnakeChallenge } from './puzzles/SnakeChallenge'
@@ -18,16 +22,28 @@ import { TransformNode } from 'babylonjs'
 const LOCALSTORAGE_KEY = 'boldbigflank-js13k2024'
 
 const getProgress = (game: string) => {
+    console.log('checking', game)
     const raw = localStorage.getItem(LOCALSTORAGE_KEY) || '{}'
     const progress = JSON.parse(raw)
     return progress[game] || false
 }
 const saveProgress = (game: string, value: boolean) => {
+    console.log('saving', game)
     const raw = localStorage.getItem(LOCALSTORAGE_KEY) || '{}'
     const progress = JSON.parse(raw)
     progress[game] = value
     localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(progress))
 }
+
+const resetProgress = () => {
+    localStorage.setItem(LOCALSTORAGE_KEY, '{}')
+}
+
+const infoText = [
+    '   Thanks for Playing!   ',
+    '   Made by Alex Swan',
+    '   Click to Restart',
+]
 
 const {
     Engine,
@@ -322,8 +338,39 @@ const init = async () => {
                 c.visibility = 0
                 c.isPickable = false
             })
+            return true
         }
     }
+
+    // Make an instructional sign
+    const infoBillboard = MeshBuilder.CreatePlane(
+        'billboard',
+        {
+            width: 2,
+            height: 1,
+            sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+        },
+        scene
+    ) as InteractiveMesh
+    infoBillboard.material = TextMaterial(infoText, ORANGE, scene)
+    infoBillboard.isPickable = true
+    infoBillboard.position = new Vector3(0, 0.75, -1.126)
+    infoBillboard.onPointerPick = () => {
+        resetProgress()
+        window.location.reload()
+    }
+    infoBillboard.setEnabled(false)
+    // this.infoBillboard = infoBillboard
+    const shouldShowSign = () => {
+        if (
+            checkPuzzleboxIsSolved(timerBox) &&
+            checkPuzzleboxIsSolved(buttonBox) &&
+            checkPuzzleboxIsSolved(snakeBox) &&
+            checkPuzzleboxIsSolved(magicBoxBox)
+        )
+            infoBillboard.setEnabled(true)
+    }
+    shouldShowSign()
     checkPuzzleboxIsSolved(timerBox)
     checkPuzzleboxIsSolved(buttonBox)
     checkPuzzleboxIsSolved(snakeBox)
@@ -332,11 +379,11 @@ const init = async () => {
     scene.registerBeforeRender(() => {
         if (!activePuzzle) return
         if (activePuzzle.isSolved()) {
-            if (activePuzzleBox) saveProgress(activePuzzleBox.name, true)
             SolvedSFX()
             activePuzzle.stop()
             activePuzzle = null
             if (activePuzzleBox) {
+                saveProgress(activePuzzleBox.name, true)
                 activePuzzleBox.isPickable = false
                 activePuzzleBox.onPointerPick = undefined
                 AnimationFactory.Instance.animateTransform({
@@ -357,6 +404,7 @@ const init = async () => {
                     c.isPickable = false
                 })
                 activePuzzleBox = null
+                shouldShowSign()
             }
             puzzleBoxes.setEnabled(true)
         } else if (activePuzzle.isFailed()) {

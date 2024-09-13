@@ -214,6 +214,7 @@ export class SnakeChallenge {
     }
 
     isSolved() {
+        if (debug) return true
         if (this.state !== 'running') return false
         if (this.solved) return true
         if (this.puzzle.isSolved()) {
