@@ -17,7 +17,6 @@ import { BoxBase } from './meshes/BoxBase'
 import { Snake } from './meshes/Snake'
 import { Thirteen } from './meshes/Thirteen'
 import { LevelChangeSFX, SolvedSFX } from './core/Sounds'
-import { TransformNode } from 'babylonjs'
 
 const LOCALSTORAGE_KEY = 'boldbigflank-js13k2024'
 
