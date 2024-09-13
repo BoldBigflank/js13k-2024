@@ -12,6 +12,7 @@ import { ClockCloud } from './meshes/ClockCloud'
 import { BoxBase } from './meshes/BoxBase'
 import { Snake } from './meshes/Snake'
 import { Thirteen } from './meshes/Thirteen'
+import { LevelChangeSFX, SolvedSFX } from './core/Sounds'
 
 const {
     Engine,
@@ -235,6 +236,7 @@ const init = async () => {
     const timerBox = ClockCloud(scene) as InteractiveMesh
     timerBox.position = new Vector3(0, 0.5, 2)
     timerBox.onPointerPick = () => {
+        LevelChangeSFX()
         activePuzzle = timerChallenge
         activePuzzleBox = timerBox
         timerChallenge.model.setEnabled(true)
@@ -247,6 +249,7 @@ const init = async () => {
     const buttonBox = Thirteen(scene) as InteractiveMesh
     buttonBox.position = new Vector3(2, 0.5, 0)
     buttonBox.onPointerPick = () => {
+        LevelChangeSFX()
         activePuzzle = buttonChallenge
         activePuzzleBox = buttonBox
         buttonChallenge.model.setEnabled(true)
@@ -259,6 +262,7 @@ const init = async () => {
     const snakeBox = Snake(scene) as InteractiveMesh
     snakeBox.position = new Vector3(0, 0.5, -2)
     snakeBox.onPointerPick = () => {
+        LevelChangeSFX()
         activePuzzle = snakeChallenge
         activePuzzleBox = snakeBox
         snakeChallenge.model.setEnabled(true)
@@ -271,6 +275,7 @@ const init = async () => {
     const magicBoxBox = BoxBase(scene) as InteractiveMesh
     magicBoxBox.position = new Vector3(-2, 0.5, 0)
     magicBoxBox.onPointerPick = () => {
+        LevelChangeSFX()
         activePuzzle = magicBoxChallenge
         activePuzzleBox = magicBoxBox
         magicBoxChallenge.model.setEnabled(true)
@@ -282,11 +287,25 @@ const init = async () => {
     scene.registerBeforeRender(() => {
         if (!activePuzzle) return
         if (activePuzzle.isSolved()) {
+            SolvedSFX()
             activePuzzle.stop()
             activePuzzle = null
             if (activePuzzleBox) {
                 activePuzzleBox.isPickable = false
                 activePuzzleBox.onPointerPick = undefined
+                AnimationFactory.Instance.animateTransform({
+                    mesh: activePuzzleBox,
+                    end: {
+                        position: new Vector3(
+                            0,
+                            1 + activePuzzleBox.metadata.offsetY,
+                            0
+                        ),
+                        scaling: new Vector3(2, 2, 2),
+                        rotation: new Vector3(0, 2 * Math.PI, 0),
+                    },
+                    duration: 1000,
+                })
                 activePuzzleBox.position = new Vector3(
                     0,
                     1 + activePuzzleBox.metadata.offsetY,

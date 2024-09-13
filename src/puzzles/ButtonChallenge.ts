@@ -3,12 +3,13 @@ import {
     BLACK,
     BLUE,
     BROWN,
-    GREEN,
-    LIGHT_GREEN,
+    DARK_GREEN,
+    WHITE,
     MID_GREY,
     ORANGE,
     YELLOW,
 } from '@/core/Colors'
+import { ButtonPressedSFX, BadThingSFX } from '@/core/Sounds'
 import { TextMaterial } from '@/core/textures'
 import { debug, sample, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
@@ -90,17 +91,18 @@ class LightButtonPuzzle {
         this.reset()
     }
 
-    pressButton(index: number) {
+    pressButton(index: number): boolean {
         const button = this.buttons[index]
-        if (button.on) return
+        if (button.on) return false
         if (!button.connectedLights.length) {
             this.reset()
-            return
+            return true
         }
         button.connectedLights.forEach((l) => {
             this.board[l.y][l.x] = 0
         })
         button.on = true
+        return false
     }
 
     isSolved() {
@@ -287,7 +289,7 @@ export class ButtonChallenge {
             if (!buttonMesh) {
                 const size = Math.floor(Math.random() * 3) * 0.075 + 0.2
                 const color = Color3.FromHexString(
-                    sample([LIGHT_GREEN, BLUE, YELLOW, MID_GREY, BROWN, BLACK])
+                    sample([DARK_GREEN, BLUE, YELLOW, MID_GREY, BROWN, BLACK])
                 )
                 const mat2 = new BABYLON.PBRMaterial(`button_${i}`)
                 mat2.metallic = 0
@@ -320,7 +322,8 @@ export class ButtonChallenge {
                         duration: 60,
                     })
                     this.start()
-                    this.puzzle.pressButton(i)
+                    const wasReset = this.puzzle.pressButton(i)
+                    wasReset ? BadThingSFX() : ButtonPressedSFX()
                     this.updateMeshes()
                 }
             }
@@ -329,7 +332,7 @@ export class ButtonChallenge {
                 const mat = buttonMesh.material as BABYLON.PBRMaterial
                 // mat.name = `button_${i}${button.on ? '_glow' : ''}`
                 mat.albedoColor = button.on
-                    ? Color3.FromHexString(GREEN)
+                    ? Color3.FromHexString(WHITE)
                     : buttonMesh.metadata.color
                 mat.emissiveColor = Color3.Black()
             }

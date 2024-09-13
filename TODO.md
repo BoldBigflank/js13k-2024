@@ -35,15 +35,7 @@ General
 
 ## SFX
 
--   Buttons - Good/Reset SFX
--   Timers - Good/Bad SFX
--   Snake - Eat
--   Snake - Move?
--   Magic Box - Select
--   Lobby - Choose Puzzle
 -   InfoPanel Play/Home
--   General - Success
--   General - Fail
 
 ## Make the Game
 

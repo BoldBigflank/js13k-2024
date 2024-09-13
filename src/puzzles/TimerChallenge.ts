@@ -1,4 +1,5 @@
 import { BLUE, ORANGE } from '@/core/Colors'
+import { BadThingSFX } from '@/core/Sounds'
 import { TextMaterial } from '@/core/textures'
 import { debug, shuffle } from '@/core/Utils'
 import { Clock } from '@/meshes/Clock'
@@ -16,14 +17,14 @@ export class TimerChallenge {
 
     solved = false
     failed = false
-    failedClocks = -1
+    failedClocks = 0
 
     constructor(scene: BABYLON.Scene) {
         this.scene = scene
         this.parent = new TransformNode('TimerChallenge', this.scene)
         this.state = 'intro'
         this.clocks = []
-        this.failedClocks = -1
+        this.failedClocks = 0
         // this.reset()
     }
 
@@ -71,6 +72,9 @@ export class TimerChallenge {
                 BLUE,
                 this.scene
             )
+            if (failedClocks > this.failedClocks) {
+                BadThingSFX()
+            }
             this.failedClocks = failedClocks
         }
 
@@ -136,7 +140,7 @@ export class TimerChallenge {
             ...Array(BOX_SIZE * BOX_HEIGHT * 4).keys(),
         ])
         for (let i = 0; i < CLOCK_COUNT; i++) {
-            const startTime = 30
+            const startTime = 25
             const difference = 5
             const jitter = Math.random() * 0.5
             const c = new Clock(

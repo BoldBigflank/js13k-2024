@@ -1,5 +1,6 @@
 import { AnimationFactory } from '@/core/Animation'
 import { BLACK, DARK_GREEN, ORANGE, RED } from '@/core/Colors'
+import { BadThingSFX, BlipSFX, GoodThingSFX } from '@/core/Sounds'
 import { ColorMaterial, TextMaterial } from '@/core/textures'
 import { debug } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
@@ -101,13 +102,16 @@ class SnakePuzzle {
     }
     isSolved() {
         if (this.solved) return this.solved
-        if (this.snakes.some((snake) => snake.body.length >= 13)) {
+        if (
+            this.snakes.some((snake) => snake.body.length >= (debug ? 3 : 13))
+        ) {
             // Do sfx and stuff
             this.solved = true
         }
         return this.solved
     }
     tick() {
+        BlipSFX()
         this.snakes.forEach((snake) => {
             if (!snake.alive) return
             // Update the move direction
@@ -132,6 +136,7 @@ class SnakePuzzle {
                 !this.spaceIsOnBoard(desiredSpot) ||
                 this.spaceHasSnakes(desiredSpot)
             ) {
+                BadThingSFX()
                 // Fail state
                 snake.alive = false
                 this.failed = true
@@ -142,6 +147,7 @@ class SnakePuzzle {
 
             // Food
             if (this.spaceHasFood(desiredSpot)) {
+                GoodThingSFX()
                 // Snake Grows
                 snake.body.push(snake.body[snake.body.length - 1])
                 // Food is removed
@@ -211,6 +217,8 @@ export class SnakeChallenge {
         if (this.state !== 'running') return false
         if (this.solved) return true
         if (this.puzzle.isSolved()) {
+            this.scene.unregisterBeforeRender(this.clock)
+
             // Celebration
             this.solved = true
         }
@@ -221,6 +229,7 @@ export class SnakeChallenge {
         if (this.state !== 'running') return false
         if (this.failed) return true
         if (this.puzzle.failed) {
+            this.scene.unregisterBeforeRender(this.clock)
             console.log('FAILED')
             // Animations, sfx
             this.failed = true

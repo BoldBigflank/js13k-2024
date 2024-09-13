@@ -1,5 +1,5 @@
 import { ColorMaterial, TextMaterial } from '@/core/textures'
-import { TickSFX } from '@/core/Sounds'
+import { GoodThingSFX, TickSFX } from '@/core/Sounds'
 import { InteractiveMesh } from '@/Types'
 import { ORANGE } from '@/core/Colors'
 
@@ -102,7 +102,7 @@ export class Clock {
                     Math.ceil((this.endDt - Date.now()) / 1000)
                 )
                 if (newValue !== this.value) {
-                    if (newValue < this.target + 6) {
+                    if (newValue < this.target + 5) {
                         this.tickSFX?.play()
                     }
                     if (newValue < this.target) this.fail()
@@ -133,6 +133,7 @@ export class Clock {
 
     pass() {
         this.state = 'passed'
+        GoodThingSFX()
         if (this.body) this.body.material = this.materials.green
     }
 

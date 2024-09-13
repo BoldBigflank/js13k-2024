@@ -1,5 +1,6 @@
 import { AnimationFactory } from '@/core/Animation'
 import { GREEN, LIGHT_GREEN, ORANGE, WHITE, YELLOW } from '@/core/Colors'
+import { MagicTileSelectedSFX } from '@/core/Sounds'
 import { ColorMaterial, TextMaterial } from '@/core/textures'
 import { debug, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
@@ -299,8 +300,10 @@ export class MagicBoxChallenge {
                     )
                     if (!clueSlot)
                         slotMesh.onPointerPick = () => {
+                            this.start()
                             this.puzzle.pickBoard(x, y)
                             this.updateMeshes()
+                            MagicTileSelectedSFX()
                         }
                 }
 
@@ -362,8 +365,10 @@ export class MagicBoxChallenge {
                 slotMesh.position = new Vector3(i, 0, 0.1)
                 slotMesh.scaling = Vector3.One()
                 slotMesh.onPointerPick = () => {
+                    this.start()
                     this.puzzle.pickRack(i)
                     this.updateMeshes()
+                    MagicTileSelectedSFX()
                 }
             }
 
