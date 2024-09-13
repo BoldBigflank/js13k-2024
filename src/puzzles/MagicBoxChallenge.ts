@@ -1,4 +1,5 @@
-import { GREEN, ORANGE } from '@/core/Colors'
+import { AnimationFactory } from '@/core/Animation'
+import { GREEN, LIGHT_GREEN, ORANGE, YELLOW } from '@/core/Colors'
 import { TextMaterial } from '@/core/textures'
 import { debug, shuffle } from '@/core/Utils'
 import { InteractiveMesh } from '@/Types'
@@ -61,12 +62,14 @@ class MagicBoxPuzzle {
     rowSum(y: number) {
         let result = 0
         this.board[y].forEach((val) => (result += val))
+        if (result === 129) result = 130
         return result
     }
 
     colSum(x: number) {
         let result = 0
         this.board.forEach((row) => (result += row[x]))
+        if (result === 129) result = 130
         return result
     }
 
@@ -143,7 +146,7 @@ export class MagicBoxChallenge {
     }
 
     isSolved() {
-        if (debug) return true
+        // if (debug) return true
         if (this.state !== 'running') return false
         if (this.solved) return true
         if (this.puzzle.isSolved()) {
@@ -215,7 +218,61 @@ export class MagicBoxChallenge {
         const { board, rack, selected } = this.puzzle
         const inventoryParent = this.scene.getMeshByName('inventory-parent')
         board.forEach((row, y) => {
+            // The sums for the row
+            const rowSumName = `magic_box_row_sum_${y}`
+            let rowSumMesh = this.scene.getMeshByName(rowSumName)
+            if (!rowSumMesh) {
+                rowSumMesh = MeshBuilder.CreatePlane(
+                    rowSumName,
+                    {
+                        width: 0.6,
+                        height: 0.6,
+                        sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                    },
+                    this.scene
+                )
+                rowSumMesh.setParent(this.boardParent)
+                rowSumMesh.scaling = Vector3.One()
+                rowSumMesh.isPickable = false
+                rowSumMesh.position = new Vector3(row.length, -1 * y, 0)
+            }
+            const rowSum = this.puzzle.rowSum(y) / 10
+            rowSumMesh.material = TextMaterial(
+                [`${rowSum}`],
+                rowSum === 13 ? LIGHT_GREEN : YELLOW,
+                this.scene
+            )
+
             row.forEach((val, x) => {
+                if (y === 0) {
+                    const colSumName = `magic_box_col_sum_${x}`
+                    let colSumMesh = this.scene.getMeshByName(colSumName)
+                    if (!colSumMesh) {
+                        colSumMesh = MeshBuilder.CreatePlane(
+                            colSumName,
+                            {
+                                width: 0.6,
+                                height: 0.6,
+                                sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+                            },
+                            this.scene
+                        )
+                        colSumMesh.setParent(this.boardParent)
+                        colSumMesh.scaling = Vector3.One()
+                        colSumMesh.isPickable = false
+                        colSumMesh.position = new Vector3(
+                            x,
+                            -1 * board.length,
+                            0
+                        )
+                    }
+                    const colSum = this.puzzle.colSum(x) / 10
+                    colSumMesh.material = TextMaterial(
+                        [`${colSum > 0 ? colSum : ''}`],
+                        colSum === 13 ? LIGHT_GREEN : YELLOW,
+                        this.scene
+                    )
+                }
                 const clueSlot = clues.includes(`${x},${y}`)
                 // The slots
                 const slotName = `magic_box_slot_${x}-${y}`
@@ -264,10 +321,17 @@ export class MagicBoxChallenge {
                         clueSlot ? GREEN : ORANGE,
                         this.scene
                     )
+                    tileMesh.position = new Vector3(x, -1 * y, 0)
                 }
                 tileMesh.setParent(this.boardParent)
                 tileMesh.scaling = Vector3.One()
-                tileMesh.position = new Vector3(x, -1 * y, 0)
+                AnimationFactory.Instance.animateTransform({
+                    mesh: tileMesh,
+                    end: {
+                        position: new Vector3(x, -1 * y, 0),
+                    },
+                    duration: 100,
+                })
             })
         })
 
@@ -312,10 +376,17 @@ export class MagicBoxChallenge {
                     ORANGE,
                     this.scene
                 )
+                tileMesh.position = new Vector3(1 * i, 0, 0)
             }
             tileMesh.setParent(this.rackParent)
             tileMesh.scaling = Vector3.One()
-            tileMesh.position = new Vector3(1 * i, 0, 0)
+            AnimationFactory.Instance.animateTransform({
+                mesh: tileMesh,
+                end: {
+                    position: new Vector3(1 * i, 0, 0),
+                },
+                duration: 100,
+            })
         })
 
         if (selected) {
@@ -337,10 +408,17 @@ export class MagicBoxChallenge {
                     ORANGE,
                     this.scene
                 )
+                tileMesh.position = new Vector3(0, 1, 0)
             }
             tileMesh.setParent(inventoryParent)
             tileMesh.scaling = Vector3.One()
-            tileMesh.position = new Vector3(0, 1, 0)
+            AnimationFactory.Instance.animateTransform({
+                mesh: tileMesh,
+                end: {
+                    position: new Vector3(0, 1, 0),
+                },
+                duration: 100,
+            })
         }
     }
 
