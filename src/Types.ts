@@ -1,14 +1,3 @@
-export interface Jar {
-    orientation: number
-    mesh: InteractiveMesh
-}
-
-export interface Tile {
-    face: number
-    slot: number
-    mesh: InteractiveMesh
-}
-
 export interface InteractiveMesh extends BABYLON.Mesh {
     onPointerPick?: (info: BABYLON.Nullable<BABYLON.PickingInfo>) => void
     onPointerMove?: (info: BABYLON.Nullable<BABYLON.PickingInfo>) => void
