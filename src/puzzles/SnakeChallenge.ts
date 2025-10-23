@@ -1,9 +1,9 @@
-import { AnimationFactory } from '@/core/Animation'
-import { BLACK, DARK_GREEN, ORANGE, RED } from '@/core/Colors'
-import { BadThingSFX, BlipSFX, GoodThingSFX } from '@/core/Sounds'
-import { ColorMaterial, TextMaterial } from '@/core/textures'
-import { debug } from '@/core/Utils'
-import { InteractiveMesh } from '@/Types'
+import { AnimationFactory } from '../core/Animation'
+import { BLACK, DARK_GREEN, ORANGE, RED } from '../core/Colors'
+import { BadThingSFX, BlipSFX, GoodThingSFX } from '../core/Sounds'
+import { ColorMaterial, TextMaterial } from '../core/textures'
+import { debug } from '../core/Utils'
+import { InteractiveMesh } from '../Types'
 const { TransformNode, Color3, Vector2, Vector3, MeshBuilder } = BABYLON
 
 const BOX_HEIGHT = 6

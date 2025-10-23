@@ -1,4 +1,4 @@
-import { ColorMaterial } from '@/core/textures'
+import { ColorMaterial } from '../core/textures'
 
 const { TransformNode, Vector3 } = BABYLON
 export class GlobPortal {

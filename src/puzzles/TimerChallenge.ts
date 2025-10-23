@@ -1,9 +1,9 @@
-import { BLUE, ORANGE } from '@/core/Colors'
-import { BadThingSFX } from '@/core/Sounds'
-import { TextMaterial } from '@/core/textures'
-import { debug, shuffle } from '@/core/Utils'
-import { Clock } from '@/meshes/Clock'
-import { InteractiveMesh } from '@/Types'
+import { BLUE, ORANGE } from '../core/Colors'
+import { BadThingSFX } from '../core/Sounds'
+import { TextMaterial } from '../core/textures'
+import { debug, shuffle } from '../core/Utils'
+import { Clock } from '../meshes/Clock'
+import { InteractiveMesh } from '../Types'
 const { TransformNode, Vector3, MeshBuilder } = BABYLON
 
 export class TimerChallenge {

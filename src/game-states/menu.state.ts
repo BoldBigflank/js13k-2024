@@ -1,8 +1,8 @@
-import { State } from '@/core/state'
-import { drawEngine } from '@/core/draw-engine'
-import { controls } from '@/core/controls'
-import { debounce } from '@/core/timing-helpers'
-import { gameStateMachine } from '@/game-state-machine'
+import { State } from '../core/state'
+import { drawEngine } from '../core/draw-engine'
+import { controls } from '../core/controls'
+import { debounce } from '../core/timing-helpers'
+import { gameStateMachine } from '../game-state-machine'
 import { gameState } from './game.state'
 
 class MenuState implements State {

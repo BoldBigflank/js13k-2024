@@ -1,4 +1,4 @@
-import { AnimationFactory } from '@/core/Animation'
+import { AnimationFactory } from '../core/Animation'
 import {
     BLACK,
     BLUE,
@@ -8,11 +8,11 @@ import {
     MID_GREY,
     ORANGE,
     YELLOW,
-} from '@/core/Colors'
-import { ButtonPressedSFX, BadThingSFX } from '@/core/Sounds'
-import { TextMaterial } from '@/core/textures'
-import { debug, sample, shuffle } from '@/core/Utils'
-import { InteractiveMesh } from '@/Types'
+} from '../core/Colors'
+import { ButtonPressedSFX, BadThingSFX } from '../core/Sounds'
+import { TextMaterial } from '../core/textures'
+import { debug, sample, shuffle } from '../core/Utils'
+import { InteractiveMesh } from '../Types'
 const { TransformNode, Vector3, Color3, MeshBuilder } = BABYLON
 
 const BOX_HEIGHT = 6

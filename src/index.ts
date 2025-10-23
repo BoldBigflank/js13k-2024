@@ -1,4 +1,4 @@
-import type { InteractiveMesh } from '@/Types'
+import type { InteractiveMesh } from './Types'
 import {
     CursorMaterial,
     ColorTextureMaterial,

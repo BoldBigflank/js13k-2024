@@ -1,5 +1,5 @@
-import { ORANGE } from '@/core/Colors'
-import { TextMaterial } from '@/core/textures'
+import { ORANGE } from '../core/Colors'
+import { TextMaterial } from '../core/textures'
 
 const { TransformNode, MeshBuilder, Vector3 } = BABYLON
 let pc = 0

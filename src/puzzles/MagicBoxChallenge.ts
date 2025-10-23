@@ -1,9 +1,9 @@
-import { AnimationFactory } from '@/core/Animation'
-import { GREEN, LIGHT_GREEN, ORANGE, WHITE, YELLOW } from '@/core/Colors'
-import { MagicTileSelectedSFX } from '@/core/Sounds'
-import { ColorMaterial, TextMaterial } from '@/core/textures'
-import { debug, shuffle } from '@/core/Utils'
-import { InteractiveMesh } from '@/Types'
+import { AnimationFactory } from '../core/Animation'
+import { GREEN, LIGHT_GREEN, ORANGE, WHITE, YELLOW } from '../core/Colors'
+import { MagicTileSelectedSFX } from '../core/Sounds'
+import { ColorMaterial, TextMaterial } from '../core/textures'
+import { debug, shuffle } from '../core/Utils'
+import { InteractiveMesh } from '../Types'
 const { TransformNode, Vector3, MeshBuilder } = BABYLON
 
 const BOX_HEIGHT = 6

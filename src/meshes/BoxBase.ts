@@ -1,5 +1,5 @@
-import { ORANGE } from '@/core/Colors'
-import { ColorMaterial } from '@/core/textures'
+import { ORANGE } from '../core/Colors'
+import { ColorMaterial } from '../core/textures'
 
 const { MeshBuilder, Vector3 } = BABYLON
 

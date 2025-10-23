@@ -1,6 +1,6 @@
-import { ColorMaterial } from '@/core/textures'
-import { TickSFX } from '@/core/Sounds'
-import { InteractiveMesh } from '@/Types'
+import { ColorMaterial } from '../core/textures'
+import { TickSFX } from '../core/Sounds'
+import { InteractiveMesh } from '../Types'
 
 const { TransformNode, MeshBuilder, Vector3 } = BABYLON
 let pc = 0

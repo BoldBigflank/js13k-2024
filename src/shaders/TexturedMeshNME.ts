@@ -1,5 +1,5 @@
 // Taken from https://nme.babylonjs.com/#Z5R20X
-import { TexturedMeshOpts } from "@/Types"
+import { TexturedMeshOpts } from "../Types"
 const TexturedMeshNME = function(opts: TexturedMeshOpts) {
     const color1 = BABYLON.Color3.FromHexString(opts.color1 || "#ff0000")
     const color2 = BABYLON.Color3.FromHexString(opts.color2 || "#0000ff")

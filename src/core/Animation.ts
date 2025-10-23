@@ -1,4 +1,4 @@
-import { AnimationTransform, AnimateTransformOpts } from '@/Types'
+import { AnimationTransform, AnimateTransformOpts } from '../Types'
 import { Clamp } from './Utils'
 
 type Animating = {
